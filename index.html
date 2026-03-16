@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#00d4aa">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="console.warn('jsdelivr failed, trying unpkg');var s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';document.head.appendChild(s)"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -285,8 +285,32 @@ function shc(s){return '<span class="shift-cell '+(s==='DS'?'ds':s==='NS'?'ns':s
 var supabaseClient=null;var ghConfig={repo:'',token:''};
 function loadConfig(){try{var c=JSON.parse(localStorage.getItem('erti_config')||'{}');if(c.supaUrl)document.getElementById('cfgSupaUrl').value=c.supaUrl;if(c.supaKey)document.getElementById('cfgSupaKey').value=c.supaKey;if(c.ghRepo)document.getElementById('cfgGhRepo').value=c.ghRepo;if(c.ghToken)document.getElementById('cfgGhToken').value=c.ghToken;if(c.supaUrl&&c.supaKey)initSupa(c.supaUrl,c.supaKey);if(c.ghRepo)ghConfig={repo:c.ghRepo,token:c.ghToken||''}}catch(e){console.warn('loadConfig:',e)}}
 function saveConfig(){var c={supaUrl:document.getElementById('cfgSupaUrl').value.trim(),supaKey:document.getElementById('cfgSupaKey').value.trim(),ghRepo:document.getElementById('cfgGhRepo').value.trim(),ghToken:document.getElementById('cfgGhToken').value.trim()};localStorage.setItem('erti_config',JSON.stringify(c));if(c.supaUrl&&c.supaKey)initSupa(c.supaUrl,c.supaKey);ghConfig={repo:c.ghRepo,token:c.ghToken};closeModal('configModal')}
-function initSupa(url,key){try{if(typeof window.supabase!=='undefined'&&window.supabase.createClient){supabaseClient=window.supabase.createClient(url,key);document.getElementById('supaConnDot').className='conn-dot on';document.getElementById('supaConnStatus').textContent='Connected';document.getElementById('connDot').style.background='var(--accent-green)'}else{document.getElementById('supaConnStatus').textContent='SDK not loaded'}}catch(e){document.getElementById('supaConnDot').className='conn-dot off';document.getElementById('supaConnStatus').textContent='Error'}}
-function testSupabase(){var u=document.getElementById('cfgSupaUrl').value.trim(),k=document.getElementById('cfgSupaKey').value.trim();if(!u||!k){alert('Enter URL and key.');return}initSupa(u,k)}
+function initSupa(url,key){
+try{
+var sdk=window.supabase||window.Supabase;
+if(!sdk){document.getElementById('supaConnStatus').textContent='SDK not loaded - check CDN';document.getElementById('supaConnDot').className='conn-dot off';return false}
+var fn=sdk.createClient||sdk.default&&sdk.default.createClient;
+if(!fn){document.getElementById('supaConnStatus').textContent='createClient not found';document.getElementById('supaConnDot').className='conn-dot off';return false}
+supabaseClient=fn(url,key);
+document.getElementById('supaConnDot').className='conn-dot on';
+document.getElementById('supaConnStatus').textContent='Client initialized';
+document.getElementById('connDot').style.background='var(--accent-green)';
+return true;
+}catch(e){document.getElementById('supaConnDot').className='conn-dot off';document.getElementById('supaConnStatus').textContent='Error: '+e.message;return false}
+}
+function testSupabase(){
+var u=document.getElementById('cfgSupaUrl').value.trim(),k=document.getElementById('cfgSupaKey').value.trim();
+if(!u||!k){alert('Enter both URL and Anon Key.');return}
+document.getElementById('supaConnStatus').textContent='Testing...';
+/* Try SDK first */
+var sdkOk=initSupa(u,k);
+/* Also do a direct REST ping to verify credentials */
+fetch(u+'/rest/v1/',{headers:{'apikey':k,'Authorization':'Bearer '+k}})
+.then(function(r){
+if(r.ok||r.status===200){document.getElementById('supaConnDot').className='conn-dot on';document.getElementById('supaConnStatus').textContent='Connected \u2713 (REST OK)';document.getElementById('connDot').style.background='var(--accent-green)'}
+else{document.getElementById('supaConnStatus').textContent=sdkOk?'SDK OK, REST HTTP '+r.status:'HTTP '+r.status}
+}).catch(function(e){document.getElementById('supaConnStatus').textContent=sdkOk?'SDK OK (offline test)':'Network error: '+e.message})
+}
 function testGitHub(){var r=document.getElementById('cfgGhRepo').value.trim();if(!r){alert('Enter repo.');return}fetch('https://api.github.com/repos/'+r).then(function(resp){if(!resp.ok)throw new Error('HTTP '+resp.status);document.getElementById('ghConnDot').className='conn-dot on';document.getElementById('ghConnStatus').textContent='Connected'}).catch(function(e){document.getElementById('ghConnDot').className='conn-dot off';document.getElementById('ghConnStatus').textContent='Failed: '+e.message})}
 function openConfigModal(){document.getElementById('cfgCurrentWW').textContent=WW.current();document.getElementById('sqlBox').textContent=MIGRATION_SQL;document.getElementById('configModal').classList.add('open')}
 
@@ -548,6 +572,7 @@ document.querySelectorAll('.tab-btn').forEach(function(b){b.addEventListener('cl
 function refreshAll(){tabMap[curTab]()}
 
 /* ===== INIT ===== */
+console.log('[ERTI] Supabase SDK check:', typeof window.supabase, window.supabase ? Object.keys(window.supabase).join(',') : 'not loaded');
 document.getElementById('wwBadge').textContent=WW.current();
 try{loadConfig()}catch(e){console.warn(e)}
 renderExec();
