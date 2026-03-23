@@ -11,113 +11,100 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg-base:#1a1d23;--bg-surface:#22262e;--bg-elevated:#2a2f38;--bg-inset:#15171c;--bg-panel:linear-gradient(145deg,#282d36,#1e2229);--metal-light:#3a3f4a;--accent-teal:#00d4aa;--accent-gold:#f0c040;--accent-blue:#4a9eff;--accent-red:#ff4757;--accent-green:#2ed573;--accent-purple:#a55eea;--status-green:#2ed573;--status-yellow:#f0c040;--status-red:#ff4757;--status-blue:#4a9eff;--font-display:'Playfair Display',Georgia,serif;--font-body:'DM Sans',sans-serif;--font-mono:'JetBrains Mono',monospace;--text-primary:#e8eaed;--text-secondary:#9aa0ab;--text-muted:#5f6672;--text-inverse:#1a1d23;--shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 12px rgba(0,0,0,.35);--shadow-lg:0 8px 30px rgba(0,0,0,.4);--shadow-inset:inset 0 2px 6px rgba(0,0,0,.35);--shadow-bevel:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(0,0,0,.2);--radius-sm:6px;--radius-md:10px;--radius-lg:14px;--radius-xl:20px}
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-body);background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow-x:hidden;background-image:radial-gradient(ellipse at 20% 50%,rgba(0,212,170,.03) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(240,192,64,.02) 0%,transparent 50%)}
+:root{--bg-base:#1a1d23;--bg-surface:#22262e;--bg-elevated:#2a2f38;--bg-inset:#15171c;--bg-panel:linear-gradient(145deg,#282d36,#1e2229);--metal-light:#3a3f4a;--accent-teal:#00d4aa;--accent-gold:#f0c040;--accent-blue:#4a9eff;--accent-red:#ff4757;--accent-green:#2ed573;--accent-purple:#a55eea;--status-green:#2ed573;--status-yellow:#f0c040;--status-red:#ff4757;--status-blue:#4a9eff;--font-display:'Playfair Display',Georgia,serif;--font-body:'DM Sans',sans-serif;--font-mono:'JetBrains Mono',monospace;--text-primary:#e8eaed;--text-secondary:#9aa0ab;--text-muted:#5f6672;--text-inverse:#1a1d23;--shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 12px rgba(0,0,0,.35);--shadow-lg:0 8px 30px rgba(0,0,0,.4);--shadow-inset:inset 0 2px 6px rgba(0,0,0,.35);--shadow-bevel:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(0,0,0,.2);--radius-sm:6px;--radius-md:10px;--radius-lg:14px;--radius-xl:20px;--sidebar-w:220px}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-body);background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
 ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg-inset);border-radius:4px}::-webkit-scrollbar-thumb{background:var(--metal-light);border-radius:4px}
-.header{background:linear-gradient(180deg,#2a2f38,#22262e);border-bottom:1px solid rgba(0,0,0,.4);box-shadow:0 2px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.05);padding:0 24px;position:sticky;top:0;z-index:100}
-.header-top{display:flex;align-items:center;justify-content:space-between;padding:16px 0 12px;flex-wrap:wrap;gap:12px}.header-brand{display:flex;align-items:center;gap:16px}
-.header-logo{width:44px;height:44px;background:linear-gradient(135deg,var(--accent-teal),#00a885);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(0,212,170,.25),inset 0 1px 0 rgba(255,255,255,.2)}
-.header-title{font-family:var(--font-display);font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--text-primary),var(--accent-teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-subtitle{font-size:11px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}.header-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.ww-badge{background:var(--bg-inset);border:1px solid rgba(0,212,170,.2);border-radius:8px;padding:6px 14px;font-family:var(--font-mono);font-size:13px;color:var(--accent-teal);box-shadow:var(--shadow-inset)}
-.btn-icon{background:linear-gradient(145deg,#333842,#282d36);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 14px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-sm),var(--shadow-bevel);transition:all .2s;white-space:nowrap}
-.btn-icon:hover{background:linear-gradient(145deg,#3a4048,#2e333c);border-color:rgba(0,212,170,.3)}
-.live-dot{width:8px;height:8px;background:var(--accent-green);border-radius:50%;animation:pulse 2s infinite;box-shadow:0 0 8px rgba(46,213,115,.4)}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
-.tab-nav{display:flex;gap:2px;overflow-x:auto}.tab-btn{padding:10px 18px;background:0 0;border:none;color:var(--text-muted);font-family:var(--font-body);font-size:12.5px;font-weight:500;cursor:pointer;position:relative;transition:all .25s;white-space:nowrap;border-radius:8px 8px 0 0}
-.tab-btn:hover{color:var(--text-secondary);background:rgba(255,255,255,.03)}.tab-btn.active{color:var(--accent-teal);background:linear-gradient(180deg,rgba(0,212,170,.08),transparent)}
-.tab-btn.active::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--accent-teal);border-radius:2px 2px 0 0;box-shadow:0 0 10px rgba(0,212,170,.4)}
-.main{padding:24px;max-width:1600px;margin:0 auto}.tab-content{display:none}.tab-content.active{display:block;animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:linear-gradient(180deg,#22262e,#1a1d23);border-right:1px solid rgba(255,255,255,.04);z-index:100;display:flex;flex-direction:column;box-shadow:2px 0 20px rgba(0,0,0,.3)}
+.sidebar-brand{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.04)}
+.sidebar-logo{width:38px;height:38px;background:linear-gradient(135deg,var(--accent-teal),#00a885);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(0,212,170,.25);margin-bottom:10px}
+.sidebar-title{font-family:var(--font-display);font-size:15px;font-weight:700;background:linear-gradient(135deg,var(--text-primary),var(--accent-teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-sub{font-size:10px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;margin-bottom:2px;border:1px solid transparent}
+.nav-item:hover{color:var(--text-secondary);background:rgba(255,255,255,.03)}.nav-item.active{color:var(--accent-teal);background:rgba(0,212,170,.08);border-color:rgba(0,212,170,.12)}
+.nav-item .icon{width:20px;text-align:center;font-size:15px}
+.sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.04)}
+.ww-badge{background:var(--bg-inset);border:1px solid rgba(0,212,170,.2);border-radius:8px;padding:6px 12px;font-family:var(--font-mono);font-size:12px;color:var(--accent-teal);text-align:center;display:block}
+.conn-ind{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);margin-top:8px}.conn-ind .d{width:6px;height:6px;border-radius:50%}.conn-ind .d.on{background:var(--accent-green)}.conn-ind .d.off{background:var(--accent-red)}
+.main{margin-left:var(--sidebar-w);padding:24px 28px;min-height:100vh}.tab-content{display:none}.tab-content.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.page-header{margin-bottom:24px}.page-header h1{font-family:var(--font-display);font-size:24px;font-weight:700}.page-header p{font-size:13px;color:var(--text-muted);margin-top:4px}
 .panel{background:var(--bg-panel);border:1px solid rgba(255,255,255,.04);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-md),var(--shadow-bevel);position:relative;overflow:hidden}
 .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
-.panel-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.panel-title .dot{width:6px;height:6px;border-radius:50%;background:var(--accent-teal);box-shadow:0 0 6px rgba(0,212,170,.4)}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:24px}
-.kpi-card{background:linear-gradient(145deg,#2e333c,#252930);border:1px solid rgba(255,255,255,.04);border-radius:var(--radius-lg);padding:20px 24px;box-shadow:var(--shadow-md),var(--shadow-bevel);position:relative;overflow:hidden;transition:transform .2s}
+.pt{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.pt .dot{width:6px;height:6px;border-radius:50%;background:var(--accent-teal);box-shadow:0 0 6px rgba(0,212,170,.4)}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:linear-gradient(145deg,#2e333c,#252930);border:1px solid rgba(255,255,255,.04);border-radius:var(--radius-lg);padding:16px 20px;position:relative;overflow:hidden;transition:transform .2s}
 .kpi-card:hover{transform:translateY(-2px)}.kpi-card::after{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:0 2px 2px 0}
-.kpi-card.green::after{background:var(--status-green)}.kpi-card.yellow::after{background:var(--status-yellow)}.kpi-card.red::after{background:var(--status-red)}.kpi-card.blue::after{background:var(--status-blue)}
-.kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin-bottom:8px}
-.kpi-value{font-family:var(--font-mono);font-size:28px;font-weight:600;color:var(--text-primary);line-height:1;margin-bottom:6px}.kpi-sub{font-size:12px;color:var(--text-secondary)}
-.kpi-change{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:12px;padding:2px 8px;border-radius:6px;margin-left:4px}
-.kpi-change.up{color:var(--status-green);background:rgba(46,213,115,.1)}.kpi-change.down{color:var(--status-red);background:rgba(255,71,87,.1)}
+.kpi-card.green::after{background:var(--status-green)}.kpi-card.yellow::after{background:var(--status-yellow)}.kpi-card.red::after{background:var(--status-red)}.kpi-card.blue::after{background:var(--status-blue)}.kpi-card.teal::after{background:var(--accent-teal)}
+.kl{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin-bottom:4px}
+.kv{font-family:var(--font-mono);font-size:24px;font-weight:600;line-height:1;margin-bottom:3px}.ks{font-size:11px;color:var(--text-secondary)}
 .inset{background:var(--bg-inset);border-radius:var(--radius-md);padding:16px;box-shadow:var(--shadow-inset);border:1px solid rgba(0,0,0,.2)}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:16px}
-@media(max-width:1024px){.grid-2,.grid-3,.grid-2-1{grid-template-columns:1fr}}
-.chart-wrap{position:relative;height:300px;margin-top:8px}.chart-wrap canvas{max-height:100%}
-.alert-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--radius-md);margin-bottom:8px;border-left:3px solid;background:rgba(0,0,0,.15)}
-.alert-item.critical{border-color:var(--status-red);background:rgba(255,71,87,.06)}.alert-item.warning{border-color:var(--status-yellow);background:rgba(240,192,64,.06)}.alert-item.info{border-color:var(--status-blue);background:rgba(74,158,255,.06)}
-.alert-icon{font-size:16px;flex-shrink:0}.alert-text{font-size:13px;color:var(--text-secondary);line-height:1.5}.alert-text strong{color:var(--text-primary)}
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.badge.green{background:rgba(46,213,115,.12);color:var(--status-green)}.badge.yellow{background:rgba(240,192,64,.12);color:var(--status-yellow)}.badge.red{background:rgba(255,71,87,.12);color:var(--status-red)}.badge.blue{background:rgba(74,158,255,.12);color:var(--status-blue)}
-.data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
-.data-table thead th{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-weight:600;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;position:sticky;top:0;background:var(--bg-inset);z-index:1}
-.data-table tbody td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text-secondary);vertical-align:middle}
-.data-table tbody tr:hover td{background:rgba(0,212,170,.04);color:var(--text-primary)}.mono{font-family:var(--font-mono);font-size:12px}
-.hm-cell{display:inline-flex;align-items:center;justify-content:center;width:32px;height:28px;border-radius:4px;font-family:var(--font-mono);font-size:11px;font-weight:600}
-.hm-cell.l0{background:rgba(255,255,255,.05);color:var(--text-muted)}.hm-cell.l1{background:rgba(255,71,87,.2);color:#ff6b7a}.hm-cell.l2{background:rgba(240,192,64,.2);color:#f0c040}.hm-cell.l3{background:rgba(46,213,115,.2);color:#2ed573}
-.shift-cell{display:inline-flex;align-items:center;justify-content:center;width:36px;height:26px;border-radius:4px;font-family:var(--font-mono);font-size:10px;font-weight:600}
-.shift-cell.ds{background:rgba(46,213,115,.15);color:#2ed573}.shift-cell.ns{background:rgba(74,158,255,.15);color:#4a9eff}.shift-cell.nt{background:rgba(240,192,64,.15);color:#f0c040}.shift-cell.vl{background:rgba(165,94,234,.15);color:#a55eea}.shift-cell.off{background:rgba(255,255,255,.03);color:var(--text-muted)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:1200px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.chart-wrap{position:relative;height:280px;margin-top:8px}.chart-wrap canvas{max-height:100%}
+.dt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.dt thead th{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-weight:600;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;position:sticky;top:0;background:var(--bg-inset);z-index:1}
+.dt tbody td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text-secondary);vertical-align:middle}
+.dt tbody tr:hover td{background:rgba(0,212,170,.04)}.mono{font-family:var(--font-mono);font-size:12px}
 .team-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
-.edit-input{background:var(--bg-inset);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 10px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;width:100%;outline:0;transition:border-color .2s}
-.edit-input:focus{border-color:var(--accent-teal);box-shadow:0 0 0 3px rgba(0,212,170,.1)}
-.edit-select,.inline-select{background:var(--bg-inset);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 10px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;outline:0;cursor:pointer}
-.inline-select{background:0 0;border-color:transparent;font-size:12px;padding:4px 6px;color:var(--text-secondary)}
-.inline-select:hover{border-color:rgba(255,255,255,.15);background:var(--bg-inset)}
+.badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase}.badge.green{background:rgba(46,213,115,.12);color:var(--status-green)}.badge.yellow{background:rgba(240,192,64,.12);color:var(--status-yellow)}.badge.red{background:rgba(255,71,87,.12);color:var(--status-red)}.badge.blue{background:rgba(74,158,255,.12);color:var(--status-blue)}
+.ei{background:var(--bg-inset);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 10px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;width:100%;outline:0}.ei:focus{border-color:var(--accent-teal)}
+.es{background:var(--bg-inset);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:6px 10px;color:var(--text-primary);font-size:13px;outline:0;cursor:pointer}
+.is{background:0 0;border:1px solid transparent;border-radius:4px;padding:3px 5px;color:var(--text-secondary);font-size:12px;cursor:pointer;outline:0}.is:hover{border-color:rgba(255,255,255,.15);background:var(--bg-inset)}
 .btn{padding:8px 18px;border-radius:8px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
-.btn-primary{background:linear-gradient(145deg,var(--accent-teal),#00b894);color:var(--text-inverse);box-shadow:0 4px 12px rgba(0,212,170,.25)}.btn-primary:hover{box-shadow:0 6px 20px rgba(0,212,170,.35);transform:translateY(-1px)}
-.btn-ghost{background:rgba(255,255,255,.05);color:var(--text-secondary);border:1px solid rgba(255,255,255,.08)}.btn-ghost:hover{background:rgba(255,255,255,.08);color:var(--text-primary)}.btn-sm{padding:5px 12px;font-size:12px}
+.btn-primary{background:linear-gradient(145deg,var(--accent-teal),#00b894);color:var(--text-inverse);box-shadow:0 4px 12px rgba(0,212,170,.25)}.btn-primary:hover{transform:translateY(-1px)}
+.btn-save{background:linear-gradient(145deg,#4a9eff,#3a8eef);color:#fff;box-shadow:0 4px 12px rgba(74,158,255,.25)}.btn-save:hover{transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text-secondary);border:1px solid rgba(255,255,255,.08)}.btn-ghost:hover{background:rgba(255,255,255,.08)}.btn-sm{padding:5px 12px;font-size:12px}
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}.modal-overlay.open{display:flex}
 .modal{background:var(--bg-elevated);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius-xl);padding:28px;width:90%;max-width:560px;box-shadow:0 24px 60px rgba(0,0,0,.5);max-height:90vh;overflow-y:auto}
-.modal h3{font-family:var(--font-display);font-size:20px;margin-bottom:20px}.form-group{margin-bottom:16px}.form-group label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px;font-weight:600}
-.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
-.cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:16px}.cal-nav-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:6px 12px;color:var(--text-secondary);cursor:pointer;font-size:14px;transition:all .2s}
-.cal-nav-btn:hover{background:rgba(0,212,170,.1);border-color:var(--accent-teal);color:var(--accent-teal)}
-.cal-title{font-family:var(--font-display);font-size:18px;font-weight:700;flex:1;text-align:center}
-.cal-grid{display:grid;grid-template-columns:180px repeat(7,1fr);gap:1px;background:rgba(255,255,255,.02);border-radius:var(--radius-md);overflow:hidden}
-.cal-header-cell{background:var(--bg-elevated);padding:10px 8px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-weight:600;text-align:center}.cal-header-cell:first-child{text-align:left;padding-left:14px}
-.cal-name-cell{background:var(--bg-surface);padding:6px 14px;display:flex;align-items:center;font-size:12px;font-weight:500;min-height:38px;border-bottom:1px solid rgba(255,255,255,.02)}
-.cal-day-cell{background:var(--bg-surface);padding:4px;text-align:center;min-height:38px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.02)}.cal-day-cell.today{background:rgba(0,212,170,.06)}
-.cal-team-row{grid-column:1/-1;background:rgba(0,0,0,.2);padding:8px 14px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:8px}
-.cal-date-sub{font-size:9px;color:var(--text-muted);display:block;margin-top:1px}
-.date-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.preset-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text-secondary);transition:all .2s}.preset-btn:hover,.preset-btn.active{background:var(--accent-teal);color:var(--text-inverse);border-color:var(--accent-teal)}
-.upload-zone{border:2px dashed rgba(0,212,170,.2);border-radius:var(--radius-lg);padding:50px 40px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(0,212,170,.02)}.upload-zone:hover{border-color:var(--accent-teal);background:rgba(0,212,170,.05)}.upload-zone.dragover{border-color:var(--accent-teal);background:rgba(0,212,170,.08)}
-.upload-zone .icon{font-size:48px;margin-bottom:12px;opacity:.7}.upload-zone h4{font-size:16px;margin-bottom:6px}.upload-zone p{font-size:13px;color:var(--text-muted)}
-.log-entry{padding:10px 14px;border-radius:8px;margin-bottom:6px;font-size:12px;display:flex;align-items:center;gap:10px}
-.log-entry.success{background:rgba(46,213,115,.08);color:var(--status-green)}.log-entry.error{background:rgba(255,71,87,.08);color:var(--status-red)}.log-entry.info{background:rgba(74,158,255,.08);color:var(--status-blue)}
-.config-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}.config-label{font-size:12px;color:var(--text-muted);min-width:120px;font-weight:600}.config-val{font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);flex:1}
-.conn-dot{width:8px;height:8px;border-radius:50%}.conn-dot.on{background:var(--accent-green);box-shadow:0 0 6px rgba(46,213,115,.5)}.conn-dot.off{background:var(--accent-red);box-shadow:0 0 6px rgba(255,71,87,.3)}
-.rag-card{padding:14px 18px;border-radius:var(--radius-md);display:flex;align-items:center;gap:12px;margin-bottom:8px;background:rgba(0,0,0,.15);border-left:3px solid}
+.modal h3{font-family:var(--font-display);font-size:20px;margin-bottom:20px}.fg{margin-bottom:14px}.fg label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:5px;font-weight:600}
 .section-gap{margin-bottom:20px}
-.sql-box{background:var(--bg-inset);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:14px;font-family:var(--font-mono);font-size:11px;color:var(--accent-teal);max-height:300px;overflow:auto;white-space:pre;line-height:1.5}
-.manning-card{background:var(--bg-inset);border-radius:var(--radius-md);padding:16px;text-align:center;box-shadow:var(--shadow-inset)}
-.manning-val{font-family:var(--font-mono);font-size:22px;font-weight:700;margin:6px 0}
-.manning-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
-.manning-input{width:60px;text-align:center;background:var(--bg-base);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 8px;color:var(--text-primary);font-family:var(--font-mono);font-size:14px;outline:0}
-.manning-input:focus{border-color:var(--accent-teal)}
-.skill-bar{height:6px;background:var(--bg-inset);border-radius:3px;margin-top:4px;overflow:hidden}.skill-fill{height:100%;border-radius:3px;transition:width .4s}
-.view-btn{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:4px 10px;color:var(--accent-teal);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-body)}.view-btn:hover{background:rgba(0,212,170,.2);border-color:var(--accent-teal)}
-.rating-select{width:50px;text-align:center;background:var(--bg-inset);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:4px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;outline:0;cursor:pointer}
-@media(max-width:768px){.main{padding:16px}.kpi-grid{grid-template-columns:1fr}}
+.sql-box{background:var(--bg-inset);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:14px;font-family:var(--font-mono);font-size:11px;color:var(--accent-teal);max-height:250px;overflow:auto;white-space:pre;line-height:1.5}
+.cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px}.cal-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:5px 10px;color:var(--text-secondary);cursor:pointer;font-size:13px}.cal-btn:hover{background:rgba(0,212,170,.1);color:var(--accent-teal)}
+.cal-title{font-family:var(--font-display);font-size:16px;font-weight:700;flex:1;text-align:center}
+.cal-grid{display:grid;grid-template-columns:140px repeat(7,1fr);gap:1px;background:rgba(255,255,255,.02);border-radius:var(--radius-md);overflow:hidden}
+.ch{background:var(--bg-elevated);padding:8px 6px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-weight:600;text-align:center}.ch:first-child{text-align:left;padding-left:10px}
+.cn{background:var(--bg-surface);padding:4px 10px;font-size:11px;font-weight:500;min-height:32px;display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.02)}
+.cd{background:var(--bg-surface);padding:2px;text-align:center;min-height:32px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.02)}.cd.today{background:rgba(0,212,170,.06)}
+.cd select{background:var(--bg-inset);border:1px solid transparent;border-radius:4px;color:var(--text-secondary);font-family:var(--font-mono);font-size:10px;padding:3px 2px;width:38px;text-align:center;outline:0;cursor:pointer;-webkit-appearance:none}.cd select:hover{border-color:rgba(255,255,255,.15)}
+.cd select.ds{color:#2ed573}.cd select.ns{color:#4a9eff}.cd select.vl{color:#a55eea}.cd select.nt{color:#f0c040}.cd select.rd{color:#ff8c42}
+.ct-row{grid-column:1/-1;background:rgba(0,0,0,.2);padding:6px 10px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:8px}
+.mc{background:var(--bg-inset);border-radius:var(--radius-md);padding:12px;text-align:center}.mv{font-family:var(--font-mono);font-size:18px;font-weight:700;margin:4px 0}.ml{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
+.mi{width:48px;text-align:center;background:var(--bg-base);border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:3px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;outline:0}
+.sb{height:5px;background:var(--bg-inset);border-radius:3px;overflow:hidden}.sf{height:100%;border-radius:3px}
+.bi{width:120px;background:var(--bg-inset);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 10px;color:var(--text-primary);font-family:var(--font-mono);font-size:13px;outline:0;text-align:right}.bi:focus{border-color:var(--accent-teal)}
+.oi{width:55px;background:var(--bg-inset);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:3px 5px;color:var(--text-primary);font-family:var(--font-mono);font-size:11px;text-align:center;outline:0}.oi:focus{border-color:var(--accent-teal)}
+.os{background:var(--bg-inset);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:3px;color:var(--text-secondary);font-size:10px;outline:0;cursor:pointer;max-width:65px}
+.preset-btn{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text-secondary);transition:all .2s}.preset-btn:hover,.preset-btn.active{background:var(--accent-teal);color:var(--text-inverse);border-color:var(--accent-teal)}
+.upload-zone{border:2px dashed rgba(0,212,170,.2);border-radius:var(--radius-lg);padding:40px;text-align:center;cursor:pointer;background:rgba(0,212,170,.02)}.upload-zone:hover{border-color:var(--accent-teal)}.upload-zone .icon{font-size:40px;margin-bottom:8px;opacity:.7}.upload-zone h4{font-size:15px;margin-bottom:4px}.upload-zone p{font-size:12px;color:var(--text-muted)}
+.log-entry{padding:6px 10px;border-radius:6px;margin-bottom:3px;font-size:12px;display:flex;align-items:center;gap:6px}.log-entry.success{background:rgba(46,213,115,.08);color:var(--status-green)}.log-entry.info{background:rgba(74,158,255,.08);color:var(--status-blue)}.log-entry.error{background:rgba(255,71,87,.08);color:var(--status-red)}
+.hm{display:inline-flex;align-items:center;justify-content:center;width:30px;height:26px;border-radius:4px;font-family:var(--font-mono);font-size:11px;font-weight:600}.hm.l0{background:rgba(255,255,255,.05);color:var(--text-muted)}.hm.l1{background:rgba(255,71,87,.2);color:#ff6b7a}.hm.l2{background:rgba(240,192,64,.2);color:#f0c040}.hm.l3{background:rgba(46,213,115,.2);color:#2ed573}
+.vb{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:4px 10px;color:var(--accent-teal);font-size:11px;font-weight:600;cursor:pointer}.vb:hover{background:rgba(0,212,170,.2)}
+.rs{width:45px;text-align:center;background:var(--bg-inset);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:3px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;outline:0;cursor:pointer}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg-elevated);border:1px solid rgba(0,212,170,.2);border-radius:10px;padding:12px 20px;color:var(--accent-teal);font-size:13px;font-weight:600;box-shadow:var(--shadow-lg);z-index:999;display:none}
+.config-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}.config-label{font-size:12px;color:var(--text-muted);min-width:110px;font-weight:600}.config-val{font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);flex:1}
+.conn-dot{width:8px;height:8px;border-radius:50%}.conn-dot.on{background:var(--accent-green)}.conn-dot.off{background:var(--accent-red)}
+.rag-card{padding:10px 14px;border-radius:var(--radius-md);display:flex;align-items:center;gap:10px;margin-bottom:5px;background:rgba(0,0,0,.15);border-left:3px solid}
+.price-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+@media(max-width:768px){.sidebar{width:60px}.sidebar-title,.sidebar-sub,.nav-item span:not(.icon){display:none}.main{margin-left:60px;padding:16px}}
 </style>
 </head>
 <body>
-<header class="header">
-<div class="header-top">
-<div class="header-brand"><div class="header-logo">&#x1f52c;</div><div><div class="header-title">ERTI Debug Nerve Center</div><div class="header-subtitle">HW Debug Operations &middot; Analog Devices</div></div></div>
-<div class="header-actions"><div class="live-dot" id="connDot"></div><div class="ww-badge" id="wwBadge">WW2620</div><button class="btn-icon" onclick="openConfigModal()">&#9881;&#65039; Settings</button></div>
-</div>
-<nav class="tab-nav">
-<button class="tab-btn active" data-tab="executive">Executive Pulse</button>
-<button class="tab-btn" data-tab="revenue">Revenue Deep Dive</button>
-<button class="tab-btn" data-tab="output">Output &amp; Productivity</button>
-<button class="tab-btn" data-tab="manpower">Manpower &amp; Schedule</button>
-<button class="tab-btn" data-tab="skills">Skills &amp; Competency</button>
-<button class="tab-btn" data-tab="people">People &amp; Attrition</button>
-<button class="tab-btn" data-tab="import">&#x1f4e5; Import Data</button>
+<aside class="sidebar">
+<div class="sidebar-brand"><div class="sidebar-logo">&#x1f52c;</div><div class="sidebar-title">ERTI Nerve Center</div><div class="sidebar-sub">HW Debug Ops</div></div>
+<nav class="sidebar-nav">
+<div class="nav-item active" data-tab="executive"><span class="icon">&#x1f4ca;</span><span>Executive Pulse</span></div>
+<div class="nav-item" data-tab="revenue"><span class="icon">&#x1f4b0;</span><span>Revenue Deep Dive</span></div>
+<div class="nav-item" data-tab="output"><span class="icon">&#x1f4c8;</span><span>Output &amp; Productivity</span></div>
+<div class="nav-item" data-tab="manpower"><span class="icon">&#x1f4c5;</span><span>Manpower &amp; Schedule</span></div>
+<div class="nav-item" data-tab="skills"><span class="icon">&#x1f9e0;</span><span>Skills &amp; Competency</span></div>
+<div class="nav-item" data-tab="people"><span class="icon">&#x1f465;</span><span>People &amp; Attrition</span></div>
+<div class="nav-item" data-tab="import"><span class="icon">&#x1f4e5;</span><span>Import Data</span></div>
+<div class="nav-item" data-tab="settings"><span class="icon">&#x2699;&#xfe0f;</span><span>Settings</span></div>
 </nav>
-</header>
+<div class="sidebar-footer"><div class="ww-badge" id="wwBadge">WW2620</div><div class="conn-ind"><span class="d off" id="sDot"></span><span id="sTxt">Offline</span></div></div>
+</aside>
 <main class="main">
 <div class="tab-content active" id="tab-executive"></div>
 <div class="tab-content" id="tab-revenue"></div>
@@ -126,344 +113,308 @@
 <div class="tab-content" id="tab-skills"></div>
 <div class="tab-content" id="tab-people"></div>
 <div class="tab-content" id="tab-import"></div>
+<div class="tab-content" id="tab-settings"></div>
 </main>
+<div class="toast" id="toast"></div>
 <!-- Employee Modal -->
-<div class="modal-overlay" id="employeeModal"><div class="modal"><h3 id="modalTitle">Add Engineer</h3>
-<div class="form-group"><label>Full Name</label><input class="edit-input" id="empName" placeholder="Dela Cruz, Juan"></div>
-<div class="form-group"><label>Team</label><select class="edit-select" id="empTeam" style="width:100%"></select></div>
-<div class="form-group"><label>Role</label><select class="edit-select" id="empRole" style="width:100%"></select></div>
-<div class="grid-2"><div class="form-group"><label>Competency</label><select class="edit-select" id="empComp" style="width:100%"><option value="1">1 Novice</option><option value="2">2 Competent</option><option value="3">3 Expert</option></select></div>
-<div class="form-group"><label>Flexibility</label><select class="edit-select" id="empFlex" style="width:100%"><option value="1">1 Single</option><option value="2">2 Multi</option></select></div></div>
-<div class="form-group"><label>Status</label><select class="edit-select" id="empStatus" style="width:100%"><option value="Active">Active</option><option value="Training">Training</option><option value="On Leave">On Leave</option><option value="Separated">Separated</option></select></div>
-<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('employeeModal')">Cancel</button><button class="btn btn-primary" id="modalSave">Save</button></div>
+<div class="modal-overlay" id="empModal"><div class="modal"><h3 id="emTitle">Add Employee</h3>
+<div class="grid-2"><div class="fg"><label>Last Name</label><input class="ei" id="emL"></div><div class="fg"><label>First Name</label><input class="ei" id="emF"></div></div>
+<div class="grid-2"><div class="fg"><label>Emp#</label><input class="ei" id="emN"></div><div class="fg"><label>Position</label><select class="es" id="emP" style="width:100%"><option>Engineer1</option><option>Engineer2</option><option>Technician3</option></select></div></div>
+<div class="grid-2"><div class="fg"><label>Team</label><select class="es" id="emT" style="width:100%"></select></div><div class="fg"><label>Hired</label><input class="ei" id="emH" type="date"></div></div>
+<div class="grid-2"><div class="fg"><label>Remarks</label><select class="es" id="emR" style="width:100%"><option>Regular</option><option>PROBI</option><option>Separated</option></select></div><div class="fg"><label>Resigned</label><input class="ei" id="emRs" type="date"></div></div>
+<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn btn-ghost" onclick="closeM('empModal')">Cancel</button><button class="btn btn-primary" onclick="saveEmp()">Save</button></div>
 </div></div>
-<!-- Config Modal -->
-<div class="modal-overlay" id="configModal"><div class="modal" style="max-width:720px"><h3>&#9881;&#65039; Settings &amp; Connections</h3>
-<div class="panel" style="margin-bottom:16px;padding:16px"><div class="panel-title"><span class="dot"></span>Supabase</div>
-<div class="form-group"><label>Project URL</label><input class="edit-input" id="cfgSupaUrl" placeholder="https://xxxxx.supabase.co"></div>
-<div class="form-group"><label>Anon Key</label><input class="edit-input" id="cfgSupaKey" placeholder="eyJhbGciOi..." type="password"></div>
-<div class="config-row"><span class="config-label">Status</span><span class="conn-dot off" id="supaConnDot"></span><span class="config-val" id="supaConnStatus">Not connected</span><button class="btn btn-sm btn-primary" onclick="testSupabase()">Test</button></div></div>
-<div class="panel" style="margin-bottom:16px;padding:16px"><div class="panel-title"><span class="dot"></span>GitHub</div>
-<div class="form-group"><label>Repository</label><input class="edit-input" id="cfgGhRepo" placeholder="owner/repo"></div>
-<div class="form-group"><label>Token</label><input class="edit-input" id="cfgGhToken" placeholder="ghp_xxx" type="password"></div>
-<div class="config-row"><span class="config-label">Status</span><span class="conn-dot off" id="ghConnDot"></span><span class="config-val" id="ghConnStatus">Not connected</span><button class="btn btn-sm btn-primary" onclick="testGitHub()">Test</button></div></div>
-<div class="panel" style="margin-bottom:16px;padding:16px"><div class="panel-title"><span class="dot"></span>Workweek</div>
-<div class="config-row"><span class="config-label">FY Start</span><span class="config-val">1st Mon of November</span></div>
-<div class="config-row"><span class="config-label">Current</span><span class="config-val" id="cfgCurrentWW">-</span></div></div>
-<div class="panel" style="padding:16px"><div class="panel-title"><span class="dot"></span>Migration SQL</div>
-<p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Run this in your Supabase SQL Editor to create all required tables:</p>
-<div class="sql-box" id="sqlBox"></div>
-<button class="btn btn-sm btn-ghost" style="margin-top:10px" id="copySqlBtn">Copy SQL</button></div>
-<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('configModal')">Close</button><button class="btn btn-primary" onclick="saveConfig()">Save</button></div>
-</div></div>
-<!-- Skill Popup Modal -->
-<div class="modal-overlay" id="skillPopup"><div class="modal" style="max-width:640px">
-<h3 id="spName">Engineer</h3>
-<p id="spMeta" style="font-size:12px;color:var(--text-muted);margin-bottom:16px"></p>
-<div class="grid-2"><div><div class="panel-title"><span class="dot"></span>Platform Ratings</div><div id="spRatings"></div></div>
-<div><div class="panel-title"><span class="dot"></span>Radar Profile</div><div style="position:relative;height:280px"><canvas id="spRadar"></canvas></div></div></div>
-<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('skillPopup')">Close</button><button class="btn btn-primary" onclick="saveSkillRatings()">Save Ratings</button></div>
+<!-- Skill Popup -->
+<div class="modal-overlay" id="skillPop"><div class="modal" style="max-width:640px">
+<h3 id="spN">-</h3><p id="spM" style="font-size:12px;color:var(--text-muted);margin-bottom:16px"></p>
+<div class="grid-2"><div><div class="pt"><span class="dot"></span>Ratings</div><div id="spR"></div></div><div><div class="pt"><span class="dot"></span>Radar</div><div style="position:relative;height:260px"><canvas id="spC"></canvas></div></div></div>
+<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn btn-ghost" onclick="closeM('skillPop')">Close</button><button class="btn btn-primary" onclick="saveSR()">Save</button></div>
 </div></div>
 <script>
 "use strict";
-/* ===== MIGRATION SQL ===== */
-var MIGRATION_SQL="-- ERTI Debug Nerve Center: Supabase Migration\n\nCREATE TABLE IF NOT EXISTS engineers (\n  id SERIAL PRIMARY KEY,\n  name TEXT NOT NULL,\n  team TEXT NOT NULL,\n  role TEXT DEFAULT 'Engineer 1',\n  competency INT DEFAULT 1,\n  flexibility INT DEFAULT 1,\n  status TEXT DEFAULT 'Active',\n  created_at TIMESTAMPTZ DEFAULT now()\n);\n\nCREATE TABLE IF NOT EXISTS revenue_entries (\n  id SERIAL PRIMARY KEY,\n  engineer_id INT REFERENCES engineers(id),\n  workweek TEXT NOT NULL,\n  amount NUMERIC(12,2) DEFAULT 0,\n  UNIQUE(engineer_id, workweek)\n);\n\nCREATE TABLE IF NOT EXISTS schedule_entries (\n  id SERIAL PRIMARY KEY,\n  engineer_id INT REFERENCES engineers(id),\n  schedule_date DATE NOT NULL,\n  shift_code TEXT DEFAULT 'DS',\n  UNIQUE(engineer_id, schedule_date)\n);\n\nCREATE TABLE IF NOT EXISTS platform_ratings (\n  id SERIAL PRIMARY KEY,\n  engineer_id INT REFERENCES engineers(id),\n  platform TEXT NOT NULL,\n  rating INT DEFAULT 0,\n  UNIQUE(engineer_id, platform)\n);\n\nCREATE TABLE IF NOT EXISTS manning_targets (\n  team TEXT PRIMARY KEY,\n  target_hc INT DEFAULT 8\n);\n\nINSERT INTO manning_targets (team, target_hc) VALUES\n  ('F1-Legacy',8),('F1-PC',6),('F2-LTX',8),\n  ('F2-ETS',7),('F3-FT',7),('F3-PC',10)\nON CONFLICT (team) DO NOTHING;";
-
-/* ===== CONSTANTS ===== */
-var TEAM_KEYS=['F1-Legacy','F1-PC','F2-LTX','F2-ETS','F3-FT','F3-PC'];
-var TEAMS={'F1-Legacy':{color:'#3B82F6',label:'F1-Legacy',platform:'HPCA/HPCS/MPD/RFC'},'F1-PC':{color:'#10B981',label:'F1-PC',platform:'Probecard (Legacy)'},'F2-LTX':{color:'#F59E0B',label:'F2-LTX',platform:'LTX Credence'},'F2-ETS':{color:'#F97316',label:'F2-ETS',platform:'ETS-800 / Eagle'},'F3-FT':{color:'#8B5CF6',label:'F3-FT',platform:'Final Test'},'F3-PC':{color:'#06B6D4',label:'F3-PC',platform:'Probecard (FT)'}};
-var ROLES=['Tech 1','Tech 2','Tech 3','Engineer 1','Engineer 2','Engineer 3'];
-var STATUSES=['Active','Training','On Leave','Separated'];
-var PLATFORMS=['CTS','FLEX','NI','AERO','EAGLE ETS','LTX'];
-var manningTargets={'F1-Legacy':8,'F1-PC':6,'F2-LTX':8,'F2-ETS':7,'F3-FT':7,'F3-PC':10};
-(function(){document.getElementById('empTeam').innerHTML=TEAM_KEYS.map(function(k){return'<option value="'+k+'">'+TEAMS[k].label+'</option>'}).join('');document.getElementById('empRole').innerHTML=ROLES.map(function(r){return'<option value="'+r+'">'+r+'</option>'}).join('')})();
-
-/* ===== WW ===== */
-var WW={_fy:function(cy){var n=new Date(cy,10,1),d=n.getDay(),o=d===0?1:d===1?0:8-d;return new Date(cy,10,1+o)},toDate:function(ww){var fy=parseInt(ww.substring(2,4)),wk=parseInt(ww.substring(4,6)),s=this._fy(2000+fy-1),d=new Date(s);d.setDate(d.getDate()+(wk-1)*7);return d},fromDate:function(date){var d=new Date(date),day=d.getDay(),mon=new Date(d);mon.setDate(d.getDate()-((day+6)%7));for(var cy=mon.getFullYear();cy>=mon.getFullYear()-1;cy--){var fs=this._fy(cy);if(mon>=fs){var wn=Math.floor((mon-fs)/(7*864e5))+1;if(wn>=1&&wn<=53)return'WW'+String((cy+1)%100).padStart(2,'0')+String(wn).padStart(2,'0')}}return'WW????'},current:function(){return this.fromDate(new Date())},weekDates:function(ww){var m=this.toDate(ww);return Array.from({length:7},function(_,i){var d=new Date(m);d.setDate(m.getDate()+i);return d})},fmt:function(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})},mondayOf:function(date){var d=new Date(date),day=d.getDay();d.setDate(d.getDate()-((day+6)%7));d.setHours(0,0,0,0);return d}};
+var TK=['F1-LEGACY','F1-PC','F2-LTX','F2-ETS','F2-ETS/LTX','F3-FT','F3-PC'];
+var TM={'F1-LEGACY':{c:'#3B82F6',l:'F1-Legacy'},'F1-PC':{c:'#10B981',l:'F1-PC'},'F2-LTX':{c:'#F59E0B',l:'F2-LTX'},'F2-ETS':{c:'#F97316',l:'F2-ETS'},'F2-ETS/LTX':{c:'#EF4444',l:'F2-ETS/LTX'},'F3-FT':{c:'#8B5CF6',l:'F3-FT'},'F3-PC':{c:'#06B6D4',l:'F3-PC'}};
+var ROLES=['Engineer1','Engineer2','Technician3'];
+var PLAT=['CTS','FLEX','NI','AERO','EAGLE ETS','LTX'];
+var mt={};TK.forEach(function(k){mt[k]=8});mt['F1-LEGACY']=10;mt['F1-PC']=5;mt['F2-LTX']=5;mt['F2-ETS']=6;mt['F2-ETS/LTX']=1;mt['F3-FT']=4;mt['F3-PC']=7;
+var teamBudgets={};TK.forEach(function(k){teamBudgets[k]={budget:0,forecast:0}});
+var priceSettings=[{id:1,hw:'Board Debug',price:5000},{id:2,hw:'Probecard',price:8000},{id:3,hw:'Cable Assembly',price:3000}];
+var nextPriceId=4;
+(function(){document.getElementById('emT').innerHTML=TK.map(function(k){return'<option value="'+k+'">'+k+'</option>'}).join('')})();
+/* WW */
+var WW={_fy:function(cy){var n=new Date(cy,10,1),d=n.getDay(),o=d===0?1:d===1?0:8-d;return new Date(cy,10,1+o)},toDate:function(ww){var fy=parseInt(ww.substring(2,4)),wk=parseInt(ww.substring(4,6)),s=this._fy(2000+fy-1),d=new Date(s);d.setDate(d.getDate()+(wk-1)*7);return d},fromDate:function(dt){var d=new Date(dt),dy=d.getDay(),mn=new Date(d);mn.setDate(d.getDate()-((dy+6)%7));for(var cy=mn.getFullYear();cy>=mn.getFullYear()-1;cy--){var fs=this._fy(cy);if(mn>=fs){var wn=Math.floor((mn-fs)/(7*864e5))+1;if(wn>=1&&wn<=53)return'WW'+String((cy+1)%100).padStart(2,'0')+String(wn).padStart(2,'0')}}return'WW????'},current:function(){return this.fromDate(new Date())},fmt:function(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})},mondayOf:function(dt){var d=new Date(dt),dy=d.getDay();d.setDate(d.getDate()-((dy+6)%7));d.setHours(0,0,0,0);return d}};
+function wwRange(start,cnt){var r=[];var d=WW.toDate(start);for(var i=0;i<cnt;i++){var dd=new Date(d);dd.setDate(d.getDate()+i*7);r.push(WW.fromDate(dd))}return r}
+var ALL_WW=wwRange('WW2601',52);
 
 /* ===== DATA ===== */
-var engineers=[
-{id:1,name:'Dimapilis, Zenilyn',team:'F1-Legacy',role:'Engineer 3',competency:3,flexibility:2,status:'Active',revenue:{apr:125557,may:83867,jun:87264}},
-{id:2,name:'Liban, Jenna Joy',team:'F1-Legacy',role:'Engineer 3',competency:3,flexibility:2,status:'Active',revenue:{apr:129666,may:77608,jun:75641}},
-{id:3,name:'Reodique, Cedric',team:'F1-Legacy',role:'Engineer 2',competency:3,flexibility:2,status:'Active',revenue:{apr:56310,may:58653,jun:13948}},
-{id:4,name:'Pepito, Jun Jovel',team:'F1-Legacy',role:'Engineer 2',competency:3,flexibility:2,status:'Active',revenue:{apr:77160,may:79754,jun:53467}},
-{id:5,name:'Teatro, Cyran',team:'F1-Legacy',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:19024,may:8204,jun:0}},
-{id:6,name:'Gargar, Louie',team:'F1-Legacy',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:5344,may:0,jun:17703}},
-{id:7,name:'Joel Martin',team:'F1-Legacy',role:'Engineer 1',competency:1,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:8,name:'Cabrales, Luke Wilson',team:'F1-Legacy',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:9391,may:0,jun:0}},
-{id:9,name:'Serrano, James Harold',team:'F1-PC',role:'Engineer 3',competency:3,flexibility:2,status:'Active',revenue:{apr:72595,may:3576,jun:13412}},
-{id:10,name:'Baldoza, Queenie',team:'F1-PC',role:'Engineer 2',competency:2,flexibility:2,status:'Active',revenue:{apr:63768,may:53825,jun:41129}},
-{id:11,name:'Perea, Mariel',team:'F1-PC',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:22829,may:3576,jun:13054}},
-{id:12,name:'Vitto, Jaylord',team:'F1-PC',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:24368,may:22353,jun:8941}},
-{id:13,name:'Ruiz, Tisha Marie',team:'F1-PC',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:35782,may:39381,jun:0}},
-{id:14,name:'Santos, Marco',team:'F1-PC',role:'Tech 2',competency:2,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:15,name:'Campos, Louise',team:'F2-LTX',role:'Engineer 2',competency:2,flexibility:1,status:'Active',revenue:{apr:49462,may:35764,jun:6279}},
-{id:16,name:'Garin, Alvin',team:'F2-LTX',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:11414,may:8941,jun:18061}},
-{id:17,name:'Lomeda Jr., Junolito',team:'F2-LTX',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:7610,may:37288,jun:43684}},
-{id:18,name:'Balmaceda, Patrick',team:'F2-LTX',role:'Engineer 1',competency:1,flexibility:1,status:'Active',revenue:{apr:22829,may:0,jun:21889}},
-{id:19,name:'Basco, Nina Rica',team:'F2-LTX',role:'Engineer 1',competency:1,flexibility:1,status:'Active',revenue:{apr:14492,may:35764,jun:19691}},
-{id:20,name:'Gutierrez, Ian',team:'F2-LTX',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:11414,may:10750,jun:55255}},
-{id:21,name:'Martinez, Marlon',team:'F2-LTX',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:0,may:24320,jun:50785}},
-{id:22,name:'Raro, Samuel',team:'F2-LTX',role:'Tech 1',competency:1,flexibility:1,status:'Training',revenue:{apr:0,may:0,jun:0}},
-{id:23,name:'Dela Cruz, Anton',team:'F2-ETS',role:'Engineer 3',competency:3,flexibility:2,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:24,name:'Ramos, Patricia',team:'F2-ETS',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:25,name:'Cruz, Michael',team:'F2-ETS',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:26,name:'Torres, Angelica',team:'F2-ETS',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:27,name:'Garcia, Rafael',team:'F2-ETS',role:'Tech 2',competency:1,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:28,name:'Perol, Rodel',team:'F2-ETS',role:'Tech 1',competency:1,flexibility:1,status:'Training',revenue:{apr:0,may:0,jun:0}},
-{id:29,name:'Sanorjo, Kevin',team:'F2-ETS',role:'Tech 1',competency:1,flexibility:1,status:'Training',revenue:{apr:0,may:0,jun:0}},
-{id:30,name:'Reyes, Carlo',team:'F3-FT',role:'Engineer 2',competency:3,flexibility:2,status:'Active',revenue:{apr:0,may:0,jun:17300}},
-{id:31,name:'Salazar, Donna',team:'F3-FT',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:0,may:0,jun:18500}},
-{id:32,name:'Mendoza, Rico',team:'F3-FT',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:33,name:'Villanueva, Joy',team:'F3-FT',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:34,name:'Aguilar, Mark',team:'F3-FT',role:'Tech 2',competency:1,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:35,name:'Gomez, Diana',team:'F3-FT',role:'Tech 1',competency:1,flexibility:1,status:'Training',revenue:{apr:0,may:0,jun:0}},
-{id:36,name:'Rivera, Jose',team:'F3-FT',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:37,name:'Mosqueda, Rex',team:'F3-PC',role:'Engineer 3',competency:3,flexibility:2,status:'Active',revenue:{apr:0,may:0,jun:43800}},
-{id:38,name:'Campos, Dennis',team:'F3-PC',role:'Engineer 2',competency:3,flexibility:2,status:'Active',revenue:{apr:0,may:0,jun:22600}},
-{id:39,name:'Santiago, Anna',team:'F3-PC',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:40,name:'De Leon, Paul',team:'F3-PC',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:41,name:'Bautista, Grace',team:'F3-PC',role:'Engineer 1',competency:2,flexibility:2,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:42,name:'Flores, Miguel',team:'F3-PC',role:'Tech 2',competency:1,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:43,name:'Navarro, Cherry',team:'F3-PC',role:'Engineer 1',competency:2,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:44,name:'Tan, Jerome',team:'F3-PC',role:'Tech 1',competency:1,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:45,name:'Ocampo, Liza',team:'F3-PC',role:'Tech 2',competency:2,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}},
-{id:46,name:'Aquino, Chris',team:'F3-PC',role:'Tech 1',competency:1,flexibility:1,status:'Active',revenue:{apr:0,may:0,jun:0}}
+var E=[
+{id:1505956,no:'1505956',last:'Liban',first:'Jenna Joy',name:'Liban, Jenna Joy B.',pos:'Engineer1',team:'F1-LEGACY',hired:'2016-01-08',resigned:'',tenure:'10 yrs/1 mo',rem:'Regular',rev:{},out:{}},
+{id:1702788,no:'1702788',last:'Perea',first:'Mariel',name:'Perea, Mariel Romea',pos:'Engineer2',team:'F2-LTX',hired:'2018-06-20',resigned:'',tenure:'7 yrs/7 mos',rem:'Regular',rev:{},out:{}},
+{id:1702862,no:'1702862',last:'Reodique',first:'Cedric',name:'Reodique, Cedric Paredes',pos:'Technician3',team:'F1-LEGACY',hired:'2019-07-16',resigned:'',tenure:'6 yrs/6 mos',rem:'Regular',rev:{},out:{}},
+{id:1702872,no:'1702872',last:'Dimapilis',first:'Zenilyn',name:'Dimapilis, Zenilyn Digma',pos:'Engineer1',team:'F1-LEGACY',hired:'2019-08-08',resigned:'',tenure:'6 yrs/5 mos',rem:'Regular',rev:{},out:{}},
+{id:2200007,no:'2200007',last:'Lomeda Jr.',first:'Junolito',name:'Lomeda Jr., Junolito Soliman',pos:'Engineer1',team:'F2-ETS',hired:'2022-02-15',resigned:'',tenure:'4 yrs/0 mo',rem:'Regular',rev:{},out:{}},
+{id:2200020,no:'2200020',last:'Vitto',first:'Jaylord',name:'Vitto, Jaylord Pineda',pos:'Technician3',team:'F2-ETS',hired:'2022-03-01',resigned:'',tenure:'4 yrs/0 mo',rem:'Regular',rev:{},out:{}},
+{id:2200038,no:'2200038',last:'Serrano',first:'James',name:'Serrano, James Harold',pos:'Engineer1',team:'F1-PC',hired:'2022-05-17',resigned:'',tenure:'3 yrs/8 mos',rem:'Regular',rev:{},out:{}},
+{id:2200047,no:'2200047',last:'Pepito',first:'Jun',name:'Pepito, Jun Jovel',pos:'Engineer1',team:'F1-LEGACY',hired:'2022-07-05',resigned:'',tenure:'3 yrs/6 mos',rem:'Regular',rev:{},out:{}},
+{id:2300083,no:'2300083',last:'Baldoza',first:'Queenie',name:'Baldoza, Queenie Gongona',pos:'Engineer1',team:'F1-PC',hired:'2023-10-19',resigned:'',tenure:'2 yrs/3 mos',rem:'Regular',rev:{},out:{}},
+{id:2400020,no:'2400020',last:'Gutierrez',first:'Ian',name:'Gutierrez, Ian Manalo',pos:'Engineer1',team:'F1-LEGACY',hired:'2024-07-30',resigned:'',tenure:'1 yr/6 mos',rem:'Regular',rev:{},out:{}},
+{id:2400025,no:'2400025',last:'Balmaceda',first:'Patrick',name:'Balmaceda, Patrick',pos:'Engineer1',team:'F2-LTX',hired:'2024-09-17',resigned:'',tenure:'1 yr/5 mos',rem:'Regular',rev:{},out:{}},
+{id:2400028,no:'2400028',last:'Campos',first:'Louise',name:'Campos, Louise',pos:'Engineer1',team:'F3-FT',hired:'2024-09-24',resigned:'',tenure:'1 yr/5 mos',rem:'Regular',rev:{},out:{}},
+{id:2400029,no:'2400029',last:'Ruiz',first:'Tisha Marie',name:'Ruiz, Tisha Marie',pos:'Technician3',team:'F2-LTX',hired:'2024-10-03',resigned:'',tenure:'1 yr/3 mos',rem:'Regular',rev:{},out:{}},
+{id:2400032,no:'2400032',last:'Garin',first:'Alvin',name:'Garin, Alvin',pos:'Engineer1',team:'F2-LTX',hired:'2024-10-17',resigned:'',tenure:'1 yr/4 mos',rem:'Regular',rev:{},out:{}},
+{id:2400036,no:'2400036',last:'Gargar',first:'Louie',name:'Gargar, Louie',pos:'Engineer2',team:'F2-ETS/LTX',hired:'2024-11-12',resigned:'',tenure:'1 yr/3 mos',rem:'Regular',rev:{},out:{}},
+{id:2400037,no:'2400037',last:'Cabrales',first:'Luke',name:'Cabrales, Luke Wilson',pos:'Engineer1',team:'F1-PC',hired:'2024-11-26',resigned:'',tenure:'1 yr/3 mos',rem:'Regular',rev:{},out:{}},
+{id:2500053,no:'2500053',last:'Salazar',first:'John Chexter',name:'Salazar, John Chexter',pos:'Engineer1',team:'F3-FT',hired:'2025-07-24',resigned:'',tenure:'6 mos',rem:'Regular',rev:{},out:{}},
+{id:2500051,no:'2500051',last:'Celis',first:'Paul Vincent',name:'Celis, Paul Vincent',pos:'Technician3',team:'F1-LEGACY',hired:'2025-07-24',resigned:'',tenure:'6 mos',rem:'Regular',rev:{},out:{}},
+{id:2500052,no:'2500052',last:'Purificacion',first:'Kim Jairus',name:'Purificacion, Kim Jairus',pos:'Engineer1',team:'F1-LEGACY',hired:'2025-07-24',resigned:'',tenure:'6 mos',rem:'Regular',rev:{},out:{}},
+{id:2500060,no:'2500060',last:'Gloriani',first:'Aaron Mathew',name:'Gloriani, Aaron Mathew Panganiban',pos:'Technician3',team:'F2-ETS',hired:'2025-08-12',resigned:'',tenure:'6 mos',rem:'Regular',rev:{},out:{}},
+{id:2500062,no:'2500062',last:'Delos Santos',first:'Ellen',name:'Delos Santos, Ellen Basilio',pos:'Engineer1',team:'F3-PC',hired:'2025-08-14',resigned:'',tenure:'6 mos',rem:'Regular',rev:{},out:{}},
+{id:2500061,no:'2500061',last:'Maniego',first:'Anttoinette',name:'Maniego, Anttoinette Abitria',pos:'Engineer1',team:'F1-LEGACY',hired:'2025-08-14',resigned:'',tenure:'6 mos',rem:'Regular',rev:{},out:{}},
+{id:2500064,no:'2500064',last:'Mosqueda',first:'Daniel',name:'Mosqueda, Daniel Rodriguez',pos:'Technician3',team:'F3-FT',hired:'2025-08-26',resigned:'',tenure:'6 mos',rem:'Regular',rev:{},out:{}},
+{id:2500073,no:'2500073',last:'Reyes',first:'Jon Lorenz',name:'Reyes, Jon Lorenz Munsayac',pos:'Engineer1',team:'F3-PC',hired:'2025-09-18',resigned:'',tenure:'5 mos',rem:'Regular',rev:{},out:{}},
+{id:2500074,no:'2500074',last:'Fajardo',first:'Jomo',name:'Fajardo, Jomo Cobillas',pos:'Engineer1',team:'F2-ETS',hired:'2025-09-18',resigned:'',tenure:'5 mos',rem:'Regular',rev:{},out:{}},
+{id:2500075,no:'2500075',last:'Buenaflor',first:'Felix Timothy',name:'Buenaflor, Felix Timothy Pano',pos:'Engineer1',team:'F2-ETS',hired:'2025-09-18',resigned:'',tenure:'5 mos',rem:'Regular',rev:{},out:{}},
+{id:2500091,no:'2500091',last:'Tapawan',first:'Ellen Marie',name:'Tapawan, Ellen Marie Ilagan',pos:'Engineer1',team:'F1-PC',hired:'2025-11-27',resigned:'',tenure:'3 mos',rem:'Regular',rev:{},out:{}},
+{id:2500092,no:'2500092',last:'Sosa',first:'Christian Lly',name:'Sosa, Christian Lly Regoso',pos:'Engineer1',team:'F1-PC',hired:'2025-11-27',resigned:'',tenure:'3 mos',rem:'Regular',rev:{},out:{}},
+{id:2500089,no:'2500089',last:'Abad',first:'Jesie',name:'Abad, Jesie Bacolod',pos:'Technician3',team:'F1-LEGACY',hired:'2025-11-27',resigned:'',tenure:'3 mos',rem:'Regular',rev:{},out:{}},
+{id:2500090,no:'2500090',last:'Pansoy',first:'Ronie',name:'Pansoy, Ronie Alcantara',pos:'Technician3',team:'F1-LEGACY',hired:'2025-11-27',resigned:'',tenure:'3 mos',rem:'Regular',rev:{},out:{}},
+{id:2500094,no:'2500094',last:'Abraham',first:'Marc Aeron',name:'Abraham, Marc Aeron',pos:'Engineer1',team:'F3-PC',hired:'2025-12-09',resigned:'',tenure:'3 mos',rem:'PROBI',rev:{},out:{}},
+{id:2500095,no:'2500095',last:'Pader',first:'May',name:'Pader, May',pos:'Engineer1',team:'F3-PC',hired:'2025-12-11',resigned:'',tenure:'3 mos',rem:'PROBI',rev:{},out:{}},
+{id:2500096,no:'2500096',last:'Avi\u00f1ante',first:'Timothy Joseph',name:'Avi\u00f1ante, Timothy Joseph',pos:'Engineer1',team:'F3-PC',hired:'2025-12-11',resigned:'',tenure:'3 mos',rem:'PROBI',rev:{},out:{}},
+{id:2600008,no:'2600008',last:'Perol',first:'Rodel',name:'Perol, Rodel Simulata',pos:'Engineer2',team:'F1-LEGACY',hired:'2026-01-22',resigned:'',tenure:'1 mo',rem:'PROBI',rev:{},out:{}},
+{id:2600007,no:'2600007',last:'Sacala',first:'Rhen John Rey',name:'Sacala, Rhen John Rey',pos:'Engineer1',team:'F2-LTX',hired:'2026-01-22',resigned:'',tenure:'1 mo',rem:'PROBI',rev:{},out:{}},
+{id:2600009,no:'2600009',last:'Gomez',first:'Joel Micolo Andrew',name:'Gomez, Joel Micolo Andrew Uriarte',pos:'Engineer1',team:'F2-ETS',hired:'2026-02-05',resigned:'',tenure:'1 mo',rem:'PROBI',rev:{},out:{}},
+{id:2600010,no:'2600010',last:'Fung',first:'Anajasnie Shamei',name:'Fung, Anajasnie Shamei Fajardo',pos:'Engineer1',team:'F3-PC',hired:'2026-02-12',resigned:'',tenure:'1 mo',rem:'PROBI',rev:{},out:{}},
+{id:2600011,no:'2600011',last:'Raro Jr.',first:'Samuel',name:'Raro, Samuel Mazo Jr.',pos:'Technician3',team:'F1-LEGACY',hired:'2026-02-12',resigned:'',tenure:'1 mo',rem:'PROBI',rev:{},out:{}}
 ];
-var nextId=47,scheduleStore={},importLog=[];
-var hcTrend=[{p:'Nov-23',f1:22,f2:13,t:35,a:0},{p:'Dec-23',f1:22,f2:13,t:35,a:0},{p:'Jan-24',f1:22,f2:13,t:35,a:0},{p:'Feb-24',f1:22,f2:13,t:35,a:0},{p:'Mar-24',f1:23,f2:13,t:26,a:9},{p:'Apr-24',f1:22,f2:13,t:24,a:2},{p:'May-24',f1:13,f2:23,t:36,a:0},{p:'Jun-24',f1:12,f2:23,t:35,a:1},{p:'Jul-24',f1:12,f2:22,t:34,a:1},{p:'Aug-24',f1:12,f2:21,t:33,a:1},{p:'Sep-24',f1:11,f2:15,t:26,a:7},{p:'Oct-24',f1:11,f2:16,t:27,a:0},{p:'Nov-24',f1:12,f2:17,t:29,a:0},{p:'Dec-24',f1:13,f2:18,t:31,a:0},{p:'Jan-25',f1:13,f2:19,t:32,a:0},{p:'Feb-25',f1:14,f2:20,t:34,a:0},{p:'Mar-25',f1:14,f2:20,t:34,a:0},{p:'Q1-26',f1:14,f2:22,t:36,a:0},{p:'Q2-26',f1:14,f2:22,t:46,a:0}];
-var outputData=[{p:'Q1 FY25',o:50,b:135},{p:'Q2 FY25',o:55.1,b:116},{p:'Q3 FY25',o:61,b:135},{p:'Q4 FY25',o:97,b:135}];
-/* Platform ratings store */
-var platRatings={};
-function getPR(id){if(!platRatings[id]){platRatings[id]={};PLATFORMS.forEach(function(p){platRatings[id][p]=0})}PLATFORMS.forEach(function(p){if(platRatings[id][p]===undefined)platRatings[id][p]=0});return platRatings[id]}
-function avgPR(id){var r=getPR(id),sum=0;PLATFORMS.forEach(function(p){sum+=(r[p]||0)});return PLATFORMS.length?sum/PLATFORMS.length:0}
-/* Seed defaults */
-(function(){var exp=[1,2,3,4,9,23,30,37,38];var mid=[5,6,10,11,12,13,15,16,17,24,25,26,31,32,39,40,41,43];exp.forEach(function(id){var r=getPR(id);PLATFORMS.forEach(function(p){r[p]=Math.floor(Math.random()*2)+2})});mid.forEach(function(id){var r=getPR(id);PLATFORMS.forEach(function(p){r[p]=Math.floor(Math.random()*2)+1})})})();
-function ensureSchedule(mon){var k=mon.toISOString().slice(0,10);if(!scheduleStore[k]){scheduleStore[k]={};getActive().forEach(function(e){var sh=[];for(var i=0;i<7;i++){if(e.status==='Training')sh.push('NT');else if(i>=5)sh.push('--');else if(Math.random()<.08)sh.push('VL');else sh.push(Math.random()<.2?'NS':'DS')}scheduleStore[k][e.id]=sh})}return scheduleStore[k]}
-
-/* ===== DERIVED ===== */
-function getActive(){return engineers.filter(function(e){return e.status!=='Separated'})}
-function getTC(){var c={};TEAM_KEYS.forEach(function(t){c[t]=0});getActive().forEach(function(e){if(c[e.team]!==undefined)c[e.team]++});return c}
-function getTotalRev(){return engineers.reduce(function(s,e){return s+e.revenue.apr+e.revenue.may+e.revenue.jun},0)}
-function getRevByTeam(){var r={};TEAM_KEYS.forEach(function(t){r[t]=0});engineers.forEach(function(e){if(r[e.team]!==undefined)r[e.team]+=e.revenue.apr+e.revenue.may+e.revenue.jun});return r}
-function getTop3(){var s=engineers.slice().sort(function(a,b){return(b.revenue.apr+b.revenue.may+b.revenue.jun)-(a.revenue.apr+a.revenue.may+a.revenue.jun)});var t3=s.slice(0,3).reduce(function(s,e){return s+e.revenue.apr+e.revenue.may+e.revenue.jun},0);var tt=getTotalRev();return tt>0?(t3/tt*100):0}
-function getAvgComp(){var a=getActive();return a.length?(a.reduce(function(s,e){return s+e.competency},0)/a.length):0}
-function getExperts(){return getActive().filter(function(e){return e.competency===3}).length}
-function getTrainees(){return engineers.filter(function(e){return e.status==='Training'}).length}
-
-/* ===== CHART ===== */
-Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=12;Chart.defaults.color='#9aa0ab';Chart.defaults.plugins.legend.labels.usePointStyle=true;Chart.defaults.plugins.tooltip.backgroundColor='#22262e';Chart.defaults.plugins.tooltip.borderColor='rgba(255,255,255,.08)';Chart.defaults.plugins.tooltip.borderWidth=1;Chart.defaults.plugins.tooltip.cornerRadius=8;Chart.defaults.plugins.tooltip.padding=12;Chart.defaults.elements.bar.borderRadius=4;Chart.defaults.scale.grid={color:'rgba(255,255,255,.04)',lineWidth:1};
-var CC={};function dc(id){if(CC[id]){CC[id].destroy();delete CC[id]}}
-function peso(n){return '\u20b1'+Number(n).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0})}
+var nxId=2700000,schedStore={},impLog=[],platR={};
+function gPR(id){if(!platR[id]){platR[id]={};PLAT.forEach(function(p){platR[id][p]=0})}PLAT.forEach(function(p){if(platR[id][p]===undefined)platR[id][p]=0});return platR[id]}
+function aR(id){var r=gPR(id),s=0;PLAT.forEach(function(p){s+=(r[p]||0)});return PLAT.length?s/PLAT.length:0}
+function ensSched(mn){var k=mn.toISOString().slice(0,10);if(!schedStore[k]){schedStore[k]={};gA().forEach(function(e){var sh=[];for(var i=0;i<7;i++){if(i>=5)sh.push('RD');else sh.push('DS')}schedStore[k][e.id]=sh})}return schedStore[k]}
+function gA(){return E.filter(function(e){return e.rem!=='Separated'&&!e.resigned})}
+function gTC(){var c={};TK.forEach(function(t){c[t]=0});gA().forEach(function(e){if(c[e.team]!==undefined)c[e.team]++});return c}
+function gRev(e){var s=0;Object.values(e.out||{}).forEach(function(ww){if(ww&&ww.count&&ww.hw){var p=priceSettings.find(function(x){return x.hw===ww.hw});if(p)s+=ww.count*p.price}});return s}
+function gTotRev(){var s=0;gA().forEach(function(e){s+=gRev(e)});return s}
+function gTotBudget(){var s=0;TK.forEach(function(k){s+=(teamBudgets[k]?teamBudgets[k].budget:0)});return s}
+function gTotForecast(){var s=0;TK.forEach(function(k){s+=(teamBudgets[k]?teamBudgets[k].forecast:0)});return s}
+function peso(n){return'\u20b1'+Number(n).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:0})}
 function pct(n){return n.toFixed(1)+'%'}
-function tdot(cls){return'<span class="team-dot" style="background:'+(TEAMS[cls]?TEAMS[cls].color:'#6B7280')+'"></span>'}
-function shc(s){return'<span class="shift-cell '+(s==='DS'?'ds':s==='NS'?'ns':s==='NT'?'nt':s==='VL'?'vl':'off')+'">'+s+'</span>'}
+function td(t){return'<span class="team-dot" style="background:'+(TM[t]?TM[t].c:'#888')+'"></span>'}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2500)}
+Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=12;Chart.defaults.color='#9aa0ab';Chart.defaults.plugins.legend.labels.usePointStyle=true;Chart.defaults.plugins.tooltip.backgroundColor='#22262e';Chart.defaults.plugins.tooltip.borderWidth=1;Chart.defaults.plugins.tooltip.cornerRadius=8;Chart.defaults.plugins.tooltip.padding=12;Chart.defaults.elements.bar.borderRadius=4;Chart.defaults.scale.grid={color:'rgba(255,255,255,.04)'};
+var CC={};function dc(id){if(CC[id]){CC[id].destroy();delete CC[id]}}
 
-/* ===== SUPABASE — Official pattern: const { createClient } = supabase ===== */
-var sb=null;var ghConfig={repo:'',token:''};
-function initSupa(url,key){
-try{
-/* The CDN exposes a global `supabase` object per official docs */
-if(typeof supabase==='undefined'||!supabase||!supabase.createClient){
-document.getElementById('supaConnDot').className='conn-dot off';
-document.getElementById('supaConnStatus').textContent='SDK not loaded. Check browser console.';
-console.error('[ERTI] window.supabase is:',typeof supabase,supabase);
-return false}
-sb=supabase.createClient(url,key);
-document.getElementById('supaConnDot').className='conn-dot on';
-document.getElementById('supaConnStatus').textContent='Client ready';
-document.getElementById('connDot').style.background='var(--accent-green)';
-return true;
-}catch(e){document.getElementById('supaConnDot').className='conn-dot off';document.getElementById('supaConnStatus').textContent='Error: '+e.message;console.error('[ERTI] Supabase init error:',e);return false}
-}
-function testSupabase(){
-var u=document.getElementById('cfgSupaUrl').value.trim(),k=document.getElementById('cfgSupaKey').value.trim();
-if(!u||!k){alert('Enter both URL and Anon Key.');return}
-document.getElementById('supaConnStatus').textContent='Testing...';
-var ok=initSupa(u,k);
-/* Also REST ping to verify creds */
-fetch(u+'/rest/v1/',{headers:{'apikey':k,'Authorization':'Bearer '+k}}).then(function(r){
-if(r.ok){document.getElementById('supaConnDot').className='conn-dot on';document.getElementById('supaConnStatus').textContent='Connected \u2713 (REST OK)';document.getElementById('connDot').style.background='var(--accent-green)'}
-else document.getElementById('supaConnStatus').textContent=ok?'SDK OK, REST '+r.status:'REST '+r.status;
-}).catch(function(e){document.getElementById('supaConnStatus').textContent=ok?'SDK ready (offline)':'Network: '+e.message})
-}
-function testGitHub(){var r=document.getElementById('cfgGhRepo').value.trim();if(!r){alert('Enter repo.');return}fetch('https://api.github.com/repos/'+r).then(function(resp){if(!resp.ok)throw new Error('HTTP '+resp.status);document.getElementById('ghConnDot').className='conn-dot on';document.getElementById('ghConnStatus').textContent='Connected'}).catch(function(e){document.getElementById('ghConnDot').className='conn-dot off';document.getElementById('ghConnStatus').textContent='Failed: '+e.message})}
-function loadConfig(){try{var c=JSON.parse(localStorage.getItem('erti_config')||'{}');if(c.supaUrl)document.getElementById('cfgSupaUrl').value=c.supaUrl;if(c.supaKey)document.getElementById('cfgSupaKey').value=c.supaKey;if(c.ghRepo)document.getElementById('cfgGhRepo').value=c.ghRepo;if(c.ghToken)document.getElementById('cfgGhToken').value=c.ghToken;if(c.supaUrl&&c.supaKey)initSupa(c.supaUrl,c.supaKey);if(c.ghRepo)ghConfig={repo:c.ghRepo,token:c.ghToken||''}}catch(e){console.warn('loadConfig:',e)}}
-function saveConfig(){var c={supaUrl:document.getElementById('cfgSupaUrl').value.trim(),supaKey:document.getElementById('cfgSupaKey').value.trim(),ghRepo:document.getElementById('cfgGhRepo').value.trim(),ghToken:document.getElementById('cfgGhToken').value.trim()};localStorage.setItem('erti_config',JSON.stringify(c));if(c.supaUrl&&c.supaKey)initSupa(c.supaUrl,c.supaKey);ghConfig={repo:c.ghRepo,token:c.ghToken};closeModal('configModal')}
-function openConfigModal(){document.getElementById('cfgCurrentWW').textContent=WW.current();document.getElementById('sqlBox').textContent=MIGRATION_SQL;document.getElementById('configModal').classList.add('open')}
-/* Push engineer to Supabase */
-function syncEngineer(eng){if(!sb)return;sb.from('engineers').upsert({id:eng.id,name:eng.name,team:eng.team,role:eng.role,competency:eng.competency,flexibility:eng.flexibility,status:eng.status}).then(function(r){if(r.error)console.warn('sync err:',r.error)})}
+/* ===== SUPABASE ===== */
+var sb=null;
+var MSQL="CREATE TABLE IF NOT EXISTS engineers (\n  id INT PRIMARY KEY,\n  emp_no TEXT, last_name TEXT, first_name TEXT, name TEXT,\n  position TEXT, team TEXT, hired DATE, resigned DATE, tenure TEXT, remarks TEXT\n);\nCREATE TABLE IF NOT EXISTS platform_ratings (\n  id SERIAL PRIMARY KEY, engineer_id INT REFERENCES engineers(id),\n  platform TEXT, rating INT DEFAULT 0, UNIQUE(engineer_id, platform)\n);\nCREATE TABLE IF NOT EXISTS output_entries (\n  id SERIAL PRIMARY KEY, engineer_id INT REFERENCES engineers(id),\n  workweek TEXT, count INT DEFAULT 0, hw_type TEXT, UNIQUE(engineer_id, workweek)\n);\nCREATE TABLE IF NOT EXISTS schedule_entries (\n  id SERIAL PRIMARY KEY, engineer_id INT REFERENCES engineers(id),\n  schedule_date DATE, shift_code TEXT, UNIQUE(engineer_id, schedule_date)\n);\nCREATE TABLE IF NOT EXISTS team_budgets (\n  team TEXT PRIMARY KEY, budget NUMERIC DEFAULT 0, forecast NUMERIC DEFAULT 0\n);\nCREATE TABLE IF NOT EXISTS price_settings (\n  id SERIAL PRIMARY KEY, hw_type TEXT UNIQUE, price NUMERIC DEFAULT 0\n);\nCREATE TABLE IF NOT EXISTS app_settings (\n  key TEXT PRIMARY KEY, value TEXT\n);";
+function initSB(u,k){try{if(typeof supabase==='undefined')return false;sb=supabase.createClient(u,k);document.getElementById('sDot').className='d on';document.getElementById('sTxt').textContent='Online';return true}catch(e){return false}}
+function loadCfg(){try{var c=JSON.parse(localStorage.getItem('erti4')||'{}');if(c.url&&c.key)initSB(c.url,c.key);if(c.tb)teamBudgets=c.tb;if(c.ps)priceSettings=c.ps;if(c.mt2)Object.assign(mt,c.mt2)}catch(e){}}
+function saveCfg(){localStorage.setItem('erti4',JSON.stringify({url:(document.getElementById('cfgU')?document.getElementById('cfgU').value:''),key:(document.getElementById('cfgK')?document.getElementById('cfgK').value:''),tb:teamBudgets,ps:priceSettings,mt2:mt}))}
+function pushEng(){if(!sb){alert('Connect Supabase first');return}var rows=E.map(function(e){return{id:e.id,emp_no:e.no,last_name:e.last,first_name:e.first,name:e.name,position:e.pos,team:e.team,hired:e.hired||null,resigned:e.resigned||null,tenure:e.tenure,remarks:e.rem}});sb.from('engineers').upsert(rows).then(function(r){toast(r.error?'Error: '+r.error.message:rows.length+' synced!')})}
+function pushBudgets(){if(!sb)return;var rows=TK.map(function(k){return{team:k,budget:teamBudgets[k]?teamBudgets[k].budget:0,forecast:teamBudgets[k]?teamBudgets[k].forecast:0}});sb.from('team_budgets').upsert(rows).then(function(r){toast(r.error?'Error':'Budgets saved!')})}
+function pushPrices(){if(!sb)return;var rows=priceSettings.map(function(p){return{hw_type:p.hw,price:p.price}});sb.from('price_settings').upsert(rows).then(function(r){toast(r.error?'Error':'Prices saved!')})}
+function fetchAll(){if(!sb)return;
+sb.from('engineers').select('*').then(function(r){if(r.data&&r.data.length){E=r.data.map(function(d){return{id:d.id,no:d.emp_no||'',last:d.last_name||'',first:d.first_name||'',name:d.name||'',pos:d.position||'Engineer1',team:d.team||'F1-LEGACY',hired:d.hired||'',resigned:d.resigned||'',tenure:d.tenure||'',rem:d.remarks||'Regular',rev:{},out:{}}});toast('Loaded '+E.length+' engineers');refreshAll()}});
+sb.from('team_budgets').select('*').then(function(r){if(r.data)r.data.forEach(function(d){if(teamBudgets[d.team])teamBudgets[d.team]={budget:parseFloat(d.budget)||0,forecast:parseFloat(d.forecast)||0}})});
+sb.from('price_settings').select('*').then(function(r){if(r.data&&r.data.length){priceSettings=r.data.map(function(d,i){return{id:i+1,hw:d.hw_type,price:parseFloat(d.price)||0}});nextPriceId=priceSettings.length+1}});}
 
 /* ===== TAB 1: EXECUTIVE ===== */
 function renderExec(){
-var tr=getTotalRev(),hc=getActive().length,rpe=hc>0?tr/hc:0,con=getTop3(),tn=getTrainees(),tc=getTC();
-var h='<div class="kpi-grid">';
-h+='<div class="kpi-card '+(tr>=2081265?'green':tr>=1770000?'yellow':'red')+'"><div class="kpi-label">Q2 Revenue</div><div class="kpi-value">'+peso(tr)+'</div><div class="kpi-sub">Target: \u20b12.08M <span class="kpi-change '+(tr>=2081265?'up':'down')+'">'+pct(tr/2081265*100)+'</span></div></div>';
-h+='<div class="kpi-card '+(hc>=35?'green':'blue')+'"><div class="kpi-label">Headcount</div><div class="kpi-value">'+hc+'</div><div class="kpi-sub">'+tn+' trainees | '+(hc-tn)+' productive</div></div>';
-h+='<div class="kpi-card '+(rpe>=93000?'green':rpe>=60000?'yellow':'red')+'"><div class="kpi-label">Rev/Engineer</div><div class="kpi-value">'+peso(Math.round(rpe))+'</div><div class="kpi-sub">Target: &ge;\u20b193K</div></div>';
-h+='<div class="kpi-card '+(con<40?'green':con<60?'yellow':'red')+'"><div class="kpi-label">Top-3 Conc.</div><div class="kpi-value">'+pct(con)+'</div><div class="kpi-sub">Target: &lt;40%</div></div></div>';
-h+='<div class="grid-2-1 section-gap"><div class="panel"><div class="panel-title"><span class="dot"></span>Teams</div>';
-TEAM_KEYS.forEach(function(k){h+='<div class="rag-card" style="border-color:'+TEAMS[k].color+'">'+tdot(k)+'<span style="font-weight:600;min-width:80px">'+TEAMS[k].label+'</span><span style="flex:1;font-size:12px;color:var(--text-muted)">'+TEAMS[k].platform+'</span><span class="mono" style="font-weight:700">'+tc[k]+'</span></div>'});
-h+='</div><div class="panel"><div class="panel-title"><span class="dot" style="background:var(--accent-red)"></span>Alerts</div>';
-h+='<div class="alert-item critical"><span class="alert-icon">&#x1f534;</span><div class="alert-text"><strong>Revenue at ~38.6%</strong> of 85% target.</div></div>';
-h+='<div class="alert-item info"><span class="alert-icon">&#x1f535;</span><div class="alert-text"><strong>Avg Comp: '+getAvgComp().toFixed(1)+'</strong> | '+getExperts()+' experts across '+TEAM_KEYS.length+' teams</div></div></div></div>';
-h+='<div class="grid-2 section-gap"><div class="panel"><div class="panel-title"><span class="dot"></span>Revenue by Team</div><div class="chart-wrap" style="height:260px"><canvas id="exRT"></canvas></div></div>';
-h+='<div class="panel"><div class="panel-title"><span class="dot"></span>Output vs Budget</div><div class="chart-wrap" style="height:260px"><canvas id="exOB"></canvas></div></div></div>';
+var rev=gTotRev(),bud=gTotBudget(),fc=gTotForecast(),hc=gA().length,tc=gTC(),gB=rev-bud,gF=rev-fc;
+var h='<div class="page-header"><h1>Executive Pulse</h1><p>Key performance indicators</p></div>';
+h+='<div class="kpi-grid">';
+h+='<div class="kpi-card blue"><div class="kl">Budget</div><div class="kv">'+peso(bud)+'</div><div class="ks">Cumulative all teams</div></div>';
+h+='<div class="kpi-card teal"><div class="kl">Forecast</div><div class="kv">'+peso(fc)+'</div></div>';
+h+='<div class="kpi-card '+(rev>=bud?'green':'red')+'"><div class="kl">Revenue to Date</div><div class="kv">'+peso(rev)+'</div><div class="ks">From output x price</div></div>';
+h+='<div class="kpi-card '+(gB>=0?'green':'red')+'"><div class="kl">Gap vs Budget</div><div class="kv">'+peso(gB)+'</div><div class="ks">'+(bud?pct(gB/bud*100):'--')+'</div></div>';
+h+='<div class="kpi-card '+(gF>=0?'green':'yellow')+'"><div class="kl">Gap vs Forecast</div><div class="kv">'+peso(gF)+'</div></div>';
+h+='</div>';
+h+='<div class="grid-2 section-gap"><div class="panel"><div class="pt"><span class="dot"></span>Revenue vs Budget vs Forecast (Monthly)</div><div class="chart-wrap" style="height:280px"><canvas id="exCombo"></canvas></div></div>';
+h+='<div class="panel"><div class="pt"><span class="dot"></span>Headcount by Team</div><div class="chart-wrap" style="height:280px"><canvas id="exHC"></canvas></div></div></div>';
+h+='<div class="panel section-gap"><div class="pt"><span class="dot"></span>Team Summary</div>';
+TK.forEach(function(k){if(!tc[k])return;var b=teamBudgets[k]?teamBudgets[k].budget:0;h+='<div class="rag-card" style="border-color:'+(TM[k]?TM[k].c:'#888')+'">'+td(k)+'<span style="font-weight:600;min-width:90px">'+(TM[k]?TM[k].l:k)+'</span><span class="mono">HC: '+tc[k]+'</span><span class="mono" style="margin-left:auto">Budget: '+peso(b)+'</span></div>'});
+h+='</div>';
+h+='<button class="btn btn-save" onclick="saveCfg();toast(\'Executive data saved\')">&#x1f4be; Save</button>';
 document.getElementById('tab-executive').innerHTML=h;
-var rbt=getRevByTeam();dc('exRT');CC['exRT']=new Chart(document.getElementById('exRT'),{type:'bar',data:{labels:TEAM_KEYS.map(function(k){return TEAMS[k].label}),datasets:[{data:TEAM_KEYS.map(function(k){return rbt[k]}),backgroundColor:TEAM_KEYS.map(function(k){return TEAMS[k].color+'99'}),borderColor:TEAM_KEYS.map(function(k){return TEAMS[k].color}),borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return peso(c.raw)}}}},scales:{y:{ticks:{callback:function(v){return'\u20b1'+(v/1e3).toFixed(0)+'K'}}},x:{grid:{display:false}}}}});
-dc('exOB');CC['exOB']=new Chart(document.getElementById('exOB'),{type:'bar',data:{labels:outputData.map(function(d){return d.p}),datasets:[{label:'Output',data:outputData.map(function(d){return d.o}),backgroundColor:'rgba(0,212,170,.6)',borderColor:'#00d4aa',borderWidth:1,borderRadius:6},{label:'Budget',data:outputData.map(function(d){return d.b}),backgroundColor:'rgba(255,255,255,.08)',borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});}
+/* Combo chart: monthly rev vs budget vs forecast */
+var months=['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];
+var monthRev=months.map(function(){return 0});/* Placeholder - would aggregate from output data */
+dc('exCombo');CC['exCombo']=new Chart(document.getElementById('exCombo'),{type:'bar',data:{labels:months,datasets:[{type:'bar',label:'Revenue',data:monthRev,backgroundColor:'#2ed57366',borderColor:'#2ed573',borderWidth:1,borderRadius:6,yAxisID:'y'},{type:'line',label:'Budget',data:months.map(function(){return bud?bud/12:0}),borderColor:'#4a9eff',borderWidth:2,pointRadius:3,tension:.3,yAxisID:'y'},{type:'line',label:'Forecast',data:months.map(function(){return fc?fc/12:0}),borderColor:'#f0c040',borderWidth:2,pointRadius:3,borderDash:[5,5],tension:.3,yAxisID:'y'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,ticks:{callback:function(v){return'\u20b1'+(v/1e3).toFixed(0)+'K'}},position:'left'},x:{grid:{display:false}}}}});
+var tks=TK.filter(function(k){return tc[k]>0});
+dc('exHC');CC['exHC']=new Chart(document.getElementById('exHC'),{type:'bar',data:{labels:tks.map(function(k){return TM[k]?TM[k].l:k}),datasets:[{data:tks.map(function(k){return tc[k]}),backgroundColor:tks.map(function(k){return(TM[k]?TM[k].c:'#888')+'99'}),borderColor:tks.map(function(k){return TM[k]?TM[k].c:'#888'}),borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:2}},x:{grid:{display:false}}}}});}
 
-/* ===== TAB 2: REVENUE ===== */
-var revPreset='workweek';
+/* ===== TAB 2: REVENUE — Per-team budgets + Price Settings ===== */
 function renderRev(){
-var sorted=engineers.slice().sort(function(a,b){return(b.revenue.apr+b.revenue.may+b.revenue.jun)-(a.revenue.apr+a.revenue.may+a.revenue.jun)}).filter(function(e){return(e.revenue.apr+e.revenue.may+e.revenue.jun)>0});
-var mt=[engineers.reduce(function(s,e){return s+e.revenue.apr},0),engineers.reduce(function(s,e){return s+e.revenue.may},0),engineers.reduce(function(s,e){return s+e.revenue.jun},0)];
-var rbt=getRevByTeam(),tk=TEAM_KEYS.filter(function(k){return rbt[k]>0});
-var h='<div class="grid-2 section-gap"><div class="panel"><div class="panel-title"><span class="dot"></span>Monthly Trend</div><div class="chart-wrap" style="height:280px"><canvas id="rvMo"></canvas></div></div>';
-h+='<div class="panel"><div class="panel-title"><span class="dot"></span>Revenue by Team</div><div class="chart-wrap" style="height:280px"><canvas id="rvTD"></canvas></div></div></div>';
-h+='<div class="panel section-gap"><div class="panel-title"><span class="dot"></span>Individual Revenue</div>';
-h+='<div class="date-toolbar"><span style="font-size:12px;color:var(--text-muted);font-weight:600">VIEW:</span>';
-['workweek','month','quarter','year'].forEach(function(p){h+='<button class="preset-btn '+(revPreset===p?'active':'')+'" onclick="setRP(\''+p+'\')">'+p.charAt(0).toUpperCase()+p.slice(1)+'</button>'});
-h+='</div><div class="inset" style="max-height:450px;overflow:auto"><table class="data-table"><thead><tr><th>#</th><th>Engineer</th><th>Team</th>';
-if(revPreset==='workweek'){var wks=['WW2522','WW2523','WW2524','WW2525','WW2526','WW2527','WW2528','WW2529','WW2530','WW2531','WW2532','WW2533'];wks.forEach(function(w){h+='<th class="mono" style="text-align:right;font-size:9px">'+w+'</th>'});h+='<th style="text-align:right">Total</th></tr></thead><tbody>';sorted.forEach(function(e,i){var t=e.revenue.apr+e.revenue.may+e.revenue.jun;h+='<tr><td class="mono">'+(i+1)+'</td><td><strong>'+e.name.split(',')[0]+'</strong></td><td style="font-size:11px">'+e.team+'</td>';wks.forEach(function(){var v=Math.round(t/12*(0.7+Math.random()*0.6));h+='<td class="mono" style="text-align:right;font-size:10px">'+(v>0?'\u20b1'+(v/1e3).toFixed(1)+'K':'--')+'</td>'});h+='<td class="mono" style="text-align:right;font-weight:600">'+peso(t)+'</td></tr>'})
-}else if(revPreset==='month'){h+='<th style="text-align:right">April</th><th style="text-align:right">May</th><th style="text-align:right">June</th><th style="text-align:right">Total</th></tr></thead><tbody>';sorted.forEach(function(e,i){var t=e.revenue.apr+e.revenue.may+e.revenue.jun;h+='<tr><td class="mono">'+(i+1)+'</td><td><strong>'+e.name+'</strong></td><td>'+tdot(e.team)+e.team+'</td><td class="mono" style="text-align:right">'+(e.revenue.apr?peso(e.revenue.apr):'--')+'</td><td class="mono" style="text-align:right">'+(e.revenue.may?peso(e.revenue.may):'--')+'</td><td class="mono" style="text-align:right">'+(e.revenue.jun?peso(e.revenue.jun):'--')+'</td><td class="mono" style="text-align:right;font-weight:600">'+peso(t)+'</td></tr>'})
-}else if(revPreset==='quarter'){h+='<th style="text-align:right">Q2 FY25 (Apr-Jun)</th></tr></thead><tbody>';sorted.forEach(function(e,i){var t=e.revenue.apr+e.revenue.may+e.revenue.jun;h+='<tr><td class="mono">'+(i+1)+'</td><td><strong>'+e.name+'</strong></td><td>'+tdot(e.team)+e.team+'</td><td class="mono" style="text-align:right;font-weight:600">'+peso(t)+'</td></tr>'})
-}else{h+='<th style="text-align:right">FY25 YTD</th></tr></thead><tbody>';sorted.forEach(function(e,i){var t=e.revenue.apr+e.revenue.may+e.revenue.jun;h+='<tr><td class="mono">'+(i+1)+'</td><td><strong>'+e.name+'</strong></td><td>'+tdot(e.team)+e.team+'</td><td class="mono" style="text-align:right;font-weight:600">'+peso(t)+'</td></tr>'})}
+var h='<div class="page-header"><h1>Revenue Deep Dive</h1><p>Budget &amp; forecast by team, price settings</p></div>';
+h+='<div class="panel section-gap"><div class="pt"><span class="dot"></span>Budget &amp; Forecast by Team</div>';
+h+='<div class="inset"><table class="dt"><thead><tr><th>Team</th><th>HC</th><th style="text-align:right">Budget (\u20b1)</th><th style="text-align:right">Forecast (\u20b1)</th></tr></thead><tbody>';
+var tc=gTC();TK.forEach(function(k){if(!tc[k]&&!teamBudgets[k])return;var tb=teamBudgets[k]||{budget:0,forecast:0};
+h+='<tr><td>'+td(k)+'<strong>'+(TM[k]?TM[k].l:k)+'</strong></td><td class="mono">'+tc[k]+'</td>';
+h+='<td style="text-align:right"><input class="bi" type="number" value="'+tb.budget+'" onchange="teamBudgets[\''+k+'\'].budget=parseFloat(this.value)||0;saveCfg()"></td>';
+h+='<td style="text-align:right"><input class="bi" type="number" value="'+tb.forecast+'" onchange="teamBudgets[\''+k+'\'].forecast=parseFloat(this.value)||0;saveCfg()"></td></tr>'});
+h+='<tr style="font-weight:700;border-top:2px solid rgba(255,255,255,.1)"><td>Total</td><td></td><td class="mono" style="text-align:right">'+peso(gTotBudget())+'</td><td class="mono" style="text-align:right">'+peso(gTotForecast())+'</td></tr>';
 h+='</tbody></table></div></div>';
-document.getElementById('tab-revenue').innerHTML=h;
-dc('rvMo');CC['rvMo']=new Chart(document.getElementById('rvMo'),{type:'line',data:{labels:['Apr','May','Jun'],datasets:[{data:mt,borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,.1)',fill:true,tension:.3,pointBackgroundColor:'#00d4aa',pointBorderColor:'#1a1d23',pointBorderWidth:3,pointRadius:6,borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return peso(c.raw)}}}},scales:{y:{ticks:{callback:function(v){return'\u20b1'+(v/1e3).toFixed(0)+'K'}}},x:{grid:{display:false}}}}});
-dc('rvTD');CC['rvTD']=new Chart(document.getElementById('rvTD'),{type:'doughnut',data:{labels:tk.map(function(k){return TEAMS[k].label}),datasets:[{data:tk.map(function(k){return rbt[k]}),backgroundColor:tk.map(function(k){return TEAMS[k].color+'cc'}),borderColor:'#22262e',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom'}}}});}
-function setRP(p){revPreset=p;renderRev()}
+/* Price Settings */
+h+='<div class="panel section-gap"><div class="pt"><span class="dot"></span>Price Settings (Hardware Types)</div>';
+h+='<p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">These appear as dropdown options in the Individual Revenue table. Revenue = Output Count &times; Price.</p>';
+h+='<div class="inset">';
+priceSettings.forEach(function(p){h+='<div class="price-row"><input class="ei" style="width:180px" value="'+p.hw+'" onchange="p=priceSettings.find(function(x){return x.id==='+p.id+'});if(p)p.hw=this.value;saveCfg()"><span style="color:var(--text-muted);font-size:12px">\u20b1</span><input class="bi" style="width:120px" type="number" value="'+p.price+'" onchange="p=priceSettings.find(function(x){return x.id==='+p.id+'});if(p)p.price=parseFloat(this.value)||0;saveCfg()"><button class="btn btn-sm btn-ghost" onclick="priceSettings=priceSettings.filter(function(x){return x.id!=='+p.id+'});saveCfg();renderRev()" style="color:var(--accent-red)">&times;</button></div>'});
+h+='<div style="margin-top:10px"><button class="btn btn-sm btn-ghost" onclick="priceSettings.push({id:nextPriceId++,hw:\'New Type\',price:0});saveCfg();renderRev()">+ Add Hardware Type</button></div></div></div>';
+h+='<div style="display:flex;gap:10px"><button class="btn btn-save" onclick="pushBudgets();pushPrices();saveCfg()">&#x1f4be; Save to Supabase</button></div>';
+document.getElementById('tab-revenue').innerHTML=h;}
 
-/* ===== TAB 3: OUTPUT ===== */
-function renderOut(){var h='<div class="kpi-grid"><div class="kpi-card blue"><div class="kpi-label">Q4 Output</div><div class="kpi-value">97</div><div class="kpi-sub">Budget:135 <span class="kpi-change up">149.7%</span></div></div><div class="kpi-card yellow"><div class="kpi-label">Output/Eng/Wk</div><div class="kpi-value">0.42</div><div class="kpi-sub">Target: &ge;0.5</div></div><div class="kpi-card yellow"><div class="kpi-label">Avg PTS</div><div class="kpi-value">0.58</div></div><div class="kpi-card green"><div class="kpi-label">First-Pass</div><div class="kpi-value">92%</div></div></div>';
-h+='<div class="panel section-gap"><div class="panel-title"><span class="dot"></span>Quarterly</div><div class="chart-wrap"><canvas id="oQ"></canvas></div></div>';
-document.getElementById('tab-output').innerHTML=h;
-dc('oQ');CC['oQ']=new Chart(document.getElementById('oQ'),{type:'bar',data:{labels:outputData.map(function(d){return d.p}),datasets:[{label:'Output',data:outputData.map(function(d){return d.o}),backgroundColor:'#00d4aa99',borderColor:'#00d4aa',borderWidth:1,borderRadius:6},{label:'Budget',data:outputData.map(function(d){return d.b}),backgroundColor:'rgba(255,255,255,.06)',borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});}
+/* ===== TAB 3: OUTPUT — Individual Revenue with WW columns ===== */
+function renderOut(){
+var act=gA();var curWW=WW.current();var wwIdx=ALL_WW.indexOf(curWW);if(wwIdx<0)wwIdx=ALL_WW.length-1;
+var startIdx=Math.max(0,wwIdx-6);var visWW=ALL_WW.slice(startIdx,startIdx+8);
+var h='<div class="page-header"><h1>Output &amp; Productivity</h1><p>Individual output &times; hardware type = revenue</p></div>';
+h+='<div class="panel section-gap"><div class="pt"><span class="dot"></span>Individual Revenue Table (WW2601+)</div>';
+h+='<p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Each cell: output count + hardware type from Price Settings. Revenue = count &times; price.</p>';
+h+='<div class="inset" style="overflow:auto;max-height:600px"><table class="dt"><thead><tr><th style="min-width:140px">Name</th><th>Team</th>';
+visWW.forEach(function(ww){h+='<th style="text-align:center;font-size:9px;min-width:110px">'+ww+'</th>'});
+h+='<th style="text-align:right;min-width:90px">Total</th></tr></thead><tbody>';
+act.forEach(function(e){
+h+='<tr><td><strong>'+e.last+'</strong></td><td style="font-size:11px">'+e.team+'</td>';
+visWW.forEach(function(ww){
+var o=e.out[ww]||{count:0,hw:''};
+h+='<td style="text-align:center"><div style="display:flex;gap:3px;justify-content:center"><input class="oi" type="number" value="'+(o.count||'')+'" placeholder="0" onchange="setOut('+e.id+',\''+ww+'\',\'count\',parseInt(this.value)||0)">';
+h+='<select class="os" onchange="setOut('+e.id+',\''+ww+'\',\'hw\',this.value)"><option value="">--</option>';
+priceSettings.forEach(function(p){h+='<option value="'+p.hw+'"'+(o.hw===p.hw?' selected':'')+'>'+p.hw+'</option>'});
+h+='</select></div></td>'});
+var tot=gRev(e);
+h+='<td class="mono" style="text-align:right;font-weight:600">'+(tot?peso(tot):'--')+'</td></tr>'});
+h+='</tbody></table></div></div>';
+h+='<button class="btn btn-save" onclick="pushOutput()">&#x1f4be; Save Output to Supabase</button>';
+document.getElementById('tab-output').innerHTML=h;}
+function setOut(id,ww,field,val){var e=E.find(function(x){return x.id===id});if(!e)return;if(!e.out[ww])e.out[ww]={count:0,hw:''};e.out[ww][field]=val;saveCfg();renderOut()}
+function pushOutput(){if(!sb){alert('Connect first');return}var rows=[];E.forEach(function(e){Object.keys(e.out||{}).forEach(function(ww){var o=e.out[ww];if(o&&o.count)rows.push({engineer_id:e.id,workweek:ww,count:o.count,hw_type:o.hw||''})})});if(rows.length)sb.from('output_entries').upsert(rows).then(function(r){toast(r.error?'Error':rows.length+' output rows saved!')});else toast('No output data to save')}
 
-/* ===== TAB 4: MANPOWER ===== */
-var calStart=WW.mondayOf(new Date());
-function renderMan(){var active=getActive(),tc=getTC(),wd=[];for(var i=0;i<7;i++){var d=new Date(calStart);d.setDate(calStart.getDate()+i);wd.push(d)}
-var ww=WW.fromDate(calStart),sched=ensureSchedule(calStart),days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],today=new Date();today.setHours(0,0,0,0);
-var tP=0,tN=0,tV=0;active.forEach(function(e){var sh=sched[e.id]||[];sh.forEach(function(s){if(s==='DS'||s==='NS')tP++;else if(s==='NT')tN++;else if(s==='VL')tV++})});
-var h='<div class="kpi-grid"><div class="kpi-card green"><div class="kpi-label">Productive</div><div class="kpi-value">'+tP+'</div><div class="kpi-sub">'+(tP*8)+'h</div></div><div class="kpi-card blue"><div class="kpi-label">Active</div><div class="kpi-value">'+active.length+'</div></div><div class="kpi-card yellow"><div class="kpi-label">NT</div><div class="kpi-value">'+tN+'</div></div><div class="kpi-card green"><div class="kpi-label">VL</div><div class="kpi-value">'+tV+'</div></div></div>';
-/* Manning capacity */
-h+='<div class="panel section-gap"><div class="panel-title"><span class="dot"></span>Manning Capacity</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">';
-TEAM_KEYS.forEach(function(k){var cur=tc[k],tgt=manningTargets[k]||8,gap=cur-tgt,cap=tgt>0?(cur/tgt*100):0,clr=cap>=100?'var(--status-green)':cap>=75?'var(--status-yellow)':'var(--status-red)';
-h+='<div class="manning-card">'+tdot(k)+'<strong style="font-size:13px">'+TEAMS[k].label+'</strong>';
-h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:10px 0"><div><div class="manning-label">Current</div><div class="manning-val">'+cur+'</div></div><div><div class="manning-label">Target</div><input class="manning-input" type="number" value="'+tgt+'" min="1" max="50" onchange="setMT(\''+k+'\',this.value)"></div><div><div class="manning-label">Gap</div><div class="manning-val" style="color:'+clr+'">'+(gap>=0?'+':'')+gap+'</div></div></div>';
-h+='<div class="manning-label">Capacity: <strong style="color:'+clr+'">'+pct(cap)+'</strong></div>';
-h+='<div class="skill-bar"><div class="skill-fill" style="width:'+Math.min(cap,100)+'%;background:'+clr+'"></div></div></div>'});
+/* ===== TAB 4: MANPOWER — Dropdown shifts ===== */
+var calS=WW.mondayOf(new Date());
+function renderMan(){var act=gA(),tc=gTC();var wd=[];for(var i=0;i<7;i++){var d=new Date(calS);d.setDate(calS.getDate()+i);wd.push(d)}
+var ww=WW.fromDate(calS),sc=ensSched(calS),days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],today=new Date();today.setHours(0,0,0,0);
+var h='<div class="page-header"><h1>Manpower &amp; Schedule</h1></div>';
+/* Manning */
+h+='<div class="panel section-gap"><div class="pt"><span class="dot"></span>Manning Capacity</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">';
+TK.forEach(function(k){var cur=tc[k]||0,tgt=mt[k]||0;if(!cur&&!tgt)return;var gap=cur-tgt,cap=tgt?(cur/tgt*100):0,cl=cap>=100?'var(--status-green)':cap>=75?'var(--status-yellow)':'var(--status-red)';
+h+='<div class="mc">'+td(k)+'<strong style="font-size:12px">'+(TM[k]?TM[k].l:k)+'</strong><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin:6px 0"><div><div class="ml">HC</div><div class="mv">'+cur+'</div></div><div><div class="ml">Tgt</div><input class="mi" type="number" value="'+tgt+'" onchange="mt[\''+k+'\']=parseInt(this.value)||1;saveCfg();renderMan()"></div><div><div class="ml">Gap</div><div class="mv" style="color:'+cl+'">'+(gap>=0?'+':'')+gap+'</div></div></div><div class="ml">'+pct(cap)+'</div><div class="sb"><div class="sf" style="width:'+Math.min(cap,100)+'%;background:'+cl+'"></div></div></div>'});
 h+='</div></div>';
-h+='<div class="panel section-gap"><div class="panel-title"><span class="dot"></span>Capacity Chart</div><div class="chart-wrap" style="height:240px"><canvas id="mCAP"></canvas></div></div>';
-/* Calendar */
-h+='<div class="panel section-gap"><div class="panel-title"><span class="dot"></span>Shift Calendar</div>';
-h+='<div class="cal-nav"><button class="cal-nav-btn" onclick="calNav(-1)">&laquo;</button><button class="cal-nav-btn" onclick="calToday()">Today</button><div class="cal-title">'+ww+' &middot; '+WW.fmt(wd[0])+' &ndash; '+WW.fmt(wd[6])+'</div><input type="date" value="'+calStart.toISOString().slice(0,10)+'" onchange="calJump(this.value)" style="background:var(--bg-inset);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 12px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;color-scheme:dark"><button class="cal-nav-btn" onclick="calNav(1)">&raquo;</button></div>';
-h+='<div style="overflow-x:auto"><div class="cal-grid"><div class="cal-header-cell">Engineer</div>';
-wd.forEach(function(d,i){var it=d.getTime()===today.getTime();h+='<div class="cal-header-cell"'+(it?' style="color:var(--accent-teal)"':'')+'>'+days[i]+'<span class="cal-date-sub">'+d.getDate()+' '+d.toLocaleDateString('en-US',{month:'short'})+'</span></div>'});
-TEAM_KEYS.forEach(function(tk){var te=active.filter(function(e){return e.team===tk});if(!te.length)return;h+='<div class="cal-team-row" style="color:'+TEAMS[tk].color+'">'+tdot(tk)+TEAMS[tk].label+' ('+te.length+')</div>';te.forEach(function(e){var sh=sched[e.id]||['--','--','--','--','--','--','--'];h+='<div class="cal-name-cell"><strong style="font-size:11px">'+e.name.split(',')[0]+'</strong></div>';sh.forEach(function(s,i){var it=wd[i].getTime()===today.getTime();h+='<div class="cal-day-cell'+(it?' today':'')+'">'+shc(s)+'</div>'})})});
+h+='<div class="panel section-gap"><div class="pt"><span class="dot"></span>Capacity Chart</div><div class="chart-wrap" style="height:220px"><canvas id="mC"></canvas></div></div>';
+/* Calendar with dropdowns */
+h+='<div class="panel section-gap"><div class="pt"><span class="dot"></span>Shift Calendar</div>';
+h+='<div class="cal-nav"><button class="cal-btn" onclick="calN(-1)">&laquo;</button><button class="cal-btn" onclick="calT()">Today</button><div class="cal-title">'+ww+'</div><input type="date" value="'+calS.toISOString().slice(0,10)+'" onchange="calJ(this.value)" style="background:var(--bg-inset);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 8px;color:var(--text-primary);font-family:var(--font-mono);font-size:11px;color-scheme:dark"><button class="cal-btn" onclick="calN(1)">&raquo;</button></div>';
+h+='<div style="overflow-x:auto"><div class="cal-grid"><div class="ch">Name</div>';
+wd.forEach(function(d,i){var it=d.getTime()===today.getTime();h+='<div class="ch"'+(it?' style="color:var(--accent-teal)"':'')+'>'+days[i]+'<span style="font-size:9px;color:var(--text-muted);display:block">'+d.getDate()+'</span></div>'});
+var shifts=['DS','NS','VL','RD','NT'];
+TK.forEach(function(tk){var te=act.filter(function(e){return e.team===tk});if(!te.length)return;
+h+='<div class="ct-row" style="color:'+(TM[tk]?TM[tk].c:'#888')+'">'+td(tk)+(TM[tk]?TM[tk].l:tk)+' ('+te.length+')</div>';
+te.forEach(function(e){var sh=sc[e.id]||['DS','DS','DS','DS','DS','RD','RD'];
+h+='<div class="cn"><strong>'+e.last+'</strong></div>';
+sh.forEach(function(s,i){var it=wd[i].getTime()===today.getTime();var cls=s.toLowerCase();
+h+='<div class="cd'+(it?' today':'')+'"><select class="'+cls+'" onchange="setSh('+e.id+','+i+',this.value)">';
+shifts.forEach(function(sv){h+='<option'+(s===sv?' selected':'')+'>'+sv+'</option>'});
+h+='</select></div>'})})});
 h+='</div></div></div>';
+h+='<button class="btn btn-save" onclick="pushSched()">&#x1f4be; Save Schedule</button>';
 document.getElementById('tab-manpower').innerHTML=h;
-dc('mCAP');CC['mCAP']=new Chart(document.getElementById('mCAP'),{type:'bar',data:{labels:TEAM_KEYS.map(function(k){return TEAMS[k].label}),datasets:[{label:'Current',data:TEAM_KEYS.map(function(k){return tc[k]}),backgroundColor:TEAM_KEYS.map(function(k){return TEAMS[k].color+'99'}),borderColor:TEAM_KEYS.map(function(k){return TEAMS[k].color}),borderWidth:1,borderRadius:6},{label:'Target',data:TEAM_KEYS.map(function(k){return manningTargets[k]||8}),backgroundColor:'rgba(255,255,255,.06)',borderColor:'rgba(255,255,255,.2)',borderWidth:1,borderRadius:6,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,ticks:{stepSize:2}},x:{grid:{display:false}}}}});}
-function setMT(t,v){manningTargets[t]=parseInt(v)||1;renderMan()}
-function calNav(d){calStart.setDate(calStart.getDate()+d*7);renderMan()}
-function calToday(){calStart=WW.mondayOf(new Date());renderMan()}
-function calJump(v){calStart=WW.mondayOf(new Date(v+'T00:00:00'));renderMan()}
+/* Chart - auto-filter teams with 0 */
+var tks=TK.filter(function(k){return(tc[k]||0)>0||(mt[k]||0)>0});
+dc('mC');CC['mC']=new Chart(document.getElementById('mC'),{type:'bar',data:{labels:tks.map(function(k){return TM[k]?TM[k].l:k}),datasets:[{label:'Current',data:tks.map(function(k){return tc[k]||0}),backgroundColor:tks.map(function(k){return(TM[k]?TM[k].c:'#888')+'99'}),borderColor:tks.map(function(k){return TM[k]?TM[k].c:'#888'}),borderWidth:1,borderRadius:6},{label:'Target',data:tks.map(function(k){return mt[k]||0}),backgroundColor:'rgba(255,255,255,.06)',borderColor:'rgba(255,255,255,.2)',borderWidth:1,borderRadius:6,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,ticks:{stepSize:2}},x:{grid:{display:false}}}}});}
+function setSh(id,day,val){var k=calS.toISOString().slice(0,10);if(schedStore[k]&&schedStore[k][id])schedStore[k][id][day]=val;/* re-color */renderMan()}
+function calN(d){calS.setDate(calS.getDate()+d*7);renderMan()}
+function calT(){calS=WW.mondayOf(new Date());renderMan()}
+function calJ(v){calS=WW.mondayOf(new Date(v+'T00:00:00'));renderMan()}
+function pushSched(){if(!sb){alert('Connect first');return}toast('Schedule save - coming soon')}
 
-/* ===== TAB 5: SKILLS — Simplified table + popup ===== */
-function renderSkills(){
-var act=getActive();
-var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:8px">';
-h+='<div><span style="font-family:var(--font-display);font-size:20px;font-weight:700">Platform Proficiency</span><br><span style="font-size:12px;color:var(--text-muted)">Click &#x1f50d; to view/edit radar profile per engineer</span></div>';
-h+='<div style="display:flex;gap:8px;align-items:center"><input class="edit-input" id="newPlatInput" placeholder="New platform..." style="width:160px"><button class="btn btn-sm btn-primary" onclick="addPlatform()">+ Platform</button></div></div>';
-h+='<div style="display:flex;gap:16px;margin-bottom:16px;font-size:11px;color:var(--text-muted)"><span><span class="hm-cell l0">0</span> N/A</span><span><span class="hm-cell l1">1</span> Novice</span><span><span class="hm-cell l2">2</span> Competent</span><span><span class="hm-cell l3">3</span> Expert</span><span style="margin-left:auto">Platforms: '+PLATFORMS.join(', ')+'</span></div>';
-/* Simplified table: Name, Team, Role, Avg Rating, View button */
-h+='<div class="panel section-gap"><div class="inset" style="max-height:500px;overflow-y:auto"><table class="data-table"><thead><tr><th>Engineer</th><th>Team</th><th>Role</th><th style="text-align:center">Avg Rating</th><th style="text-align:center">Matrix</th></tr></thead><tbody>';
-act.sort(function(a,b){return avgPR(b.id)-avgPR(a.id)}).forEach(function(e){
-var avg=avgPR(e.id),lvl=Math.round(avg);
-h+='<tr><td><strong>'+e.name+'</strong></td><td>'+tdot(e.team)+e.team+'</td><td style="font-size:12px">'+e.role+'</td>';
-h+='<td style="text-align:center"><span class="hm-cell l'+lvl+'">'+avg.toFixed(1)+'</span></td>';
-h+='<td style="text-align:center"><button class="view-btn" onclick="openSkillPopup('+e.id+')">&#x1f50d; View</button></td></tr>'});
+/* ===== TAB 5: SKILLS ===== */
+function renderSkills(){var act=gA();
+var h='<div class="page-header"><h1>Skills &amp; Competency</h1><p>Click &#x1f50d; to view/edit radar</p></div>';
+h+='<div style="display:flex;gap:8px;margin-bottom:16px;align-items:center"><input class="ei" id="npI" placeholder="New platform..." style="width:150px"><button class="btn btn-sm btn-primary" onclick="addPlat()">+ Platform</button><span style="margin-left:auto;font-size:11px;color:var(--text-muted)">'+PLAT.join(', ')+'</span></div>';
+h+='<div class="panel section-gap"><div class="inset" style="max-height:500px;overflow-y:auto"><table class="dt"><thead><tr><th>Name</th><th>Team</th><th>Position</th><th style="text-align:center">Avg</th><th style="text-align:center">Matrix</th></tr></thead><tbody>';
+act.sort(function(a,b){return aR(b.id)-aR(a.id)}).forEach(function(e){var av=aR(e.id);
+h+='<tr><td><strong>'+e.name+'</strong></td><td>'+td(e.team)+e.team+'</td><td style="font-size:12px">'+e.pos+'</td>';
+h+='<td style="text-align:center"><span class="hm l'+Math.round(av)+'">'+av.toFixed(1)+'</span></td>';
+h+='<td style="text-align:center"><button class="vb" onclick="openSP('+e.id+')">&#x1f50d; View</button></td></tr>'});
 h+='</tbody></table></div></div>';
-h+='<div class="grid-2 section-gap"><div class="panel"><div class="panel-title"><span class="dot"></span>Avg Rating by Platform</div><div class="chart-wrap" style="height:280px"><canvas id="sPB"></canvas></div></div>';
-h+='<div class="panel"><div class="panel-title"><span class="dot"></span>Expert Coverage</div><div class="chart-wrap" style="height:280px"><canvas id="sEC"></canvas></div></div></div>';
-document.getElementById('tab-skills').innerHTML=h;
-var pa=PLATFORMS.map(function(p){var vals=act.map(function(e){return(getPR(e.id)[p])||0});return vals.reduce(function(a,b){return a+b},0)/Math.max(vals.length,1)});
-dc('sPB');CC['sPB']=new Chart(document.getElementById('sPB'),{type:'bar',data:{labels:PLATFORMS,datasets:[{data:pa,backgroundColor:'rgba(0,212,170,.6)',borderColor:'#00d4aa',borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:3,ticks:{stepSize:1,callback:function(v){return['N/A','Nov','Comp','Exp'][v]||v}}},x:{grid:{display:false}}}}});
-var ebt={};TEAM_KEYS.forEach(function(k){ebt[k]=0});act.forEach(function(e){if(e.competency===3&&ebt[e.team]!==undefined)ebt[e.team]++});
-dc('sEC');CC['sEC']=new Chart(document.getElementById('sEC'),{type:'radar',data:{labels:TEAM_KEYS.map(function(k){return TEAMS[k].label}),datasets:[{label:'Experts',data:TEAM_KEYS.map(function(k){return ebt[k]}),borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,.15)',borderWidth:2,pointBackgroundColor:'#00d4aa'},{label:'Target(2)',data:TEAM_KEYS.map(function(){return 2}),borderColor:'#ff4757',backgroundColor:'rgba(255,71,87,.05)',borderWidth:1,borderDash:[5,5],pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:5,ticks:{stepSize:1}}}}});}
-function addPlatform(){var inp=document.getElementById('newPlatInput'),name=inp.value.trim().toUpperCase();if(!name){alert('Enter name.');return}if(PLATFORMS.indexOf(name)>=0){alert('Already exists.');return}PLATFORMS.push(name);inp.value='';renderSkills()}
-/* Skill popup with radar */
-var spEngId=null;
-function openSkillPopup(id){spEngId=id;var e=engineers.find(function(x){return x.id===id});if(!e)return;var pr=getPR(id);
-document.getElementById('spName').textContent=e.name;
-document.getElementById('spMeta').textContent=e.team+' | '+e.role+' | '+e.status;
-var rh='';PLATFORMS.forEach(function(p){var r=pr[p]||0;
-rh+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="min-width:80px;font-size:12px;font-weight:600">'+p+'</span>';
-rh+='<select class="rating-select" onchange="updateSPR(\''+p+'\',this.value)">';
+h+='<button class="btn btn-save" onclick="pushRatings()">&#x1f4be; Save Ratings</button>';
+document.getElementById('tab-skills').innerHTML=h;}
+function addPlat(){var inp=document.getElementById('npI'),n=inp.value.trim().toUpperCase();if(!n||PLAT.indexOf(n)>=0)return;PLAT.push(n);inp.value='';renderSkills()}
+var spId=null;
+function openSP(id){spId=id;var e=E.find(function(x){return x.id===id});if(!e)return;var pr=gPR(id);
+document.getElementById('spN').textContent=e.name;document.getElementById('spM').textContent=e.team+' | '+e.pos;
+var rh='';PLAT.forEach(function(p){var r=pr[p]||0;rh+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="min-width:65px;font-size:12px;font-weight:600">'+p+'</span><select class="rs" onchange="uSPR(\''+p+'\',this.value)">';
 for(var i=0;i<=3;i++)rh+='<option value="'+i+'"'+(r===i?' selected':'')+'>'+i+'</option>';
-rh+='</select><div class="skill-bar" style="flex:1"><div class="skill-fill" style="width:'+(r/3*100)+'%;background:'+(r===0?'var(--text-muted)':r===1?'#ff6b7a':r===2?'#f0c040':'#2ed573')+'"></div></div>';
-rh+='<span class="hm-cell l'+r+'">'+r+'</span></div>'});
-document.getElementById('spRatings').innerHTML=rh;
-dc('spRadar');CC['spRadar']=new Chart(document.getElementById('spRadar'),{type:'radar',data:{labels:PLATFORMS,datasets:[{label:e.name.split(',')[0],data:PLATFORMS.map(function(p){return pr[p]||0}),borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,.2)',borderWidth:2,pointBackgroundColor:'#00d4aa',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:3,ticks:{stepSize:1,callback:function(v){return['','Nov','Comp','Exp'][v]||v}}}},plugins:{legend:{display:false}}}});
-document.getElementById('skillPopup').classList.add('open')}
-function updateSPR(p,v){if(spEngId!==null){getPR(spEngId)[p]=parseInt(v);openSkillPopup(spEngId);if(sb)sb.from('platform_ratings').upsert({engineer_id:spEngId,platform:p,rating:parseInt(v)}).then(function(){})}}
-function saveSkillRatings(){closeModal('skillPopup');renderSkills()}
+rh+='</select><div class="sb" style="flex:1"><div class="sf" style="width:'+(r/3*100)+'%;background:'+(r===0?'#5f6672':r===1?'#ff6b7a':r===2?'#f0c040':'#2ed573')+'"></div></div><span class="hm l'+r+'">'+r+'</span></div>'});
+document.getElementById('spR').innerHTML=rh;
+dc('spC');CC['spC']=new Chart(document.getElementById('spC'),{type:'radar',data:{labels:PLAT,datasets:[{label:e.last,data:PLAT.map(function(p){return pr[p]||0}),borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,.2)',borderWidth:2,pointBackgroundColor:'#00d4aa',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:3,ticks:{stepSize:1}}},plugins:{legend:{display:false}}}});
+document.getElementById('skillPop').classList.add('open')}
+function uSPR(p,v){if(spId!==null){gPR(spId)[p]=parseInt(v);openSP(spId)}}
+function saveSR(){closeM('skillPop');renderSkills()}
+function pushRatings(){if(!sb){alert('Connect first');return}var rows=[];E.forEach(function(e){var pr=gPR(e.id);PLAT.forEach(function(p){if(pr[p])rows.push({engineer_id:e.id,platform:p,rating:pr[p]})})});if(rows.length)sb.from('platform_ratings').upsert(rows).then(function(r){toast(r.error?'Error':rows.length+' ratings saved!')});else toast('No ratings to save')}
 
-/* ===== TAB 6: PEOPLE — Simplified, status syncs everywhere ===== */
-var pFilter=null;
-function renderPeople(){
-var act=getActive(),tc=getTC(),sep=engineers.filter(function(e){return e.status==='Separated'});
-var h='<div class="kpi-grid"><div class="kpi-card blue"><div class="kpi-label">HC</div><div class="kpi-value">'+act.length+'</div></div><div class="kpi-card '+(sep.length>5?'red':'yellow')+'"><div class="kpi-label">Separated</div><div class="kpi-value">'+sep.length+'</div></div><div class="kpi-card green"><div class="kpi-label">Trainees</div><div class="kpi-value">'+getTrainees()+'</div></div><div class="kpi-card '+(act.length>=35?'green':'yellow')+'"><div class="kpi-label">vs Base</div><div class="kpi-value">'+(act.length>=35?'+':'')+(act.length-35)+'</div></div></div>';
-h+='<div class="grid-2 section-gap"><div class="panel"><div class="panel-title"><span class="dot"></span>HC Trend</div><div class="chart-wrap" style="height:280px"><canvas id="pHC"></canvas></div></div>';
-h+='<div class="panel"><div class="panel-title"><span class="dot"></span>Attrition</div><div class="chart-wrap" style="height:280px"><canvas id="pAT"></canvas></div></div></div>';
-h+='<div class="panel section-gap"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div class="panel-title" style="margin-bottom:0"><span class="dot"></span>Roster</div><button class="btn btn-primary" onclick="openAdd()">+ Add</button></div>';
-h+='<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><button class="btn btn-sm '+(!pFilter?'btn-primary':'btn-ghost')+'" onclick="setPF(null)">All ('+engineers.length+')</button>';
-TEAM_KEYS.forEach(function(k){h+='<button class="btn btn-sm '+(pFilter===k?'btn-primary':'btn-ghost')+'" onclick="setPF(\''+k+'\')">'+tdot(k)+TEAMS[k].label+' ('+tc[k]+')</button>'});
-/* Simplified table: Name, Team, Role, Status, Actions */
-h+='</div><div class="inset" style="max-height:500px;overflow-y:auto"><table class="data-table"><thead><tr><th>Name</th><th>Team</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
-engineers.filter(function(e){return!pFilter||e.team===pFilter}).sort(function(a,b){if(a.status==='Separated'&&b.status!=='Separated')return 1;if(a.status!=='Separated'&&b.status==='Separated')return -1;return a.name.localeCompare(b.name)}).forEach(function(e){
-h+='<tr style="'+(e.status==='Separated'?'opacity:.4':'')+'"><td><strong>'+e.name+'</strong></td>';
-h+='<td><select class="inline-select" onchange="iEdit('+e.id+',\'team\',this.value)">';TEAM_KEYS.forEach(function(k){h+='<option value="'+k+'"'+(e.team===k?' selected':'')+'>'+TEAMS[k].label+'</option>'});h+='</select></td>';
-h+='<td><select class="inline-select" onchange="iEdit('+e.id+',\'role\',this.value)">';ROLES.forEach(function(r){h+='<option value="'+r+'"'+(e.role===r?' selected':'')+'>'+r+'</option>'});h+='</select></td>';
-h+='<td><select class="inline-select" onchange="iEdit('+e.id+',\'status\',this.value)">';STATUSES.forEach(function(s){h+='<option value="'+s+'"'+(e.status===s?' selected':'')+'>'+s+'</option>'});h+='</select></td>';
-h+='<td style="white-space:nowrap"><button class="btn btn-sm btn-ghost" onclick="openEdit('+e.id+')">&#9999;</button><button class="btn btn-sm btn-ghost" onclick="delEng('+e.id+')" style="color:var(--accent-red)">&times;</button></td></tr>'});
+/* ===== TAB 6: PEOPLE ===== */
+function renderPeople(){var tc=gTC(),act=gA(),sep=E.filter(function(e){return e.rem==='Separated'||!!e.resigned});
+var h='<div class="page-header"><h1>People &amp; Attrition</h1><p>Central hub &mdash; changes propagate everywhere</p></div>';
+h+='<div class="kpi-grid"><div class="kpi-card blue"><div class="kl">Active</div><div class="kv">'+act.length+'</div></div><div class="kpi-card red"><div class="kl">Separated</div><div class="kv">'+sep.length+'</div></div><div class="kpi-card green"><div class="kl">Regular</div><div class="kv">'+E.filter(function(e){return e.rem==='Regular'}).length+'</div></div><div class="kpi-card yellow"><div class="kl">Probi</div><div class="kv">'+E.filter(function(e){return e.rem==='PROBI'}).length+'</div></div></div>';
+h+='<div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary" onclick="openAddE()">+ Add Employee</button><button class="btn btn-save" onclick="pushEng()">&#x1f4be; Save to Supabase</button></div>';
+h+='<div class="panel section-gap"><div class="inset" style="max-height:550px;overflow:auto"><table class="dt"><thead><tr><th>Emp#</th><th>Name</th><th>Position</th><th>Team</th><th>Hired</th><th>Tenure</th><th>Remarks</th><th>Act</th></tr></thead><tbody>';
+E.forEach(function(e){var iS=e.rem==='Separated'||!!e.resigned;
+h+='<tr style="'+(iS?'opacity:.4':'')+'"><td class="mono" style="font-size:11px">'+e.no+'</td><td><strong>'+e.name+'</strong></td>';
+h+='<td><select class="is" onchange="iEP('+e.id+',\'pos\',this.value)">';ROLES.forEach(function(r){h+='<option'+(e.pos===r?' selected':'')+'>'+r+'</option>'});h+='</select></td>';
+h+='<td><select class="is" onchange="iEP('+e.id+',\'team\',this.value)">';TK.forEach(function(k){h+='<option value="'+k+'"'+(e.team===k?' selected':'')+'>'+(TM[k]?TM[k].l:k)+'</option>'});h+='</select></td>';
+h+='<td class="mono" style="font-size:11px">'+(e.hired||'--')+'</td><td style="font-size:11px">'+(e.tenure||'--')+'</td>';
+h+='<td><select class="is" onchange="iEP('+e.id+',\'rem\',this.value)"><option'+(e.rem==='Regular'?' selected':'')+'>Regular</option><option'+(e.rem==='PROBI'?' selected':'')+'>PROBI</option><option'+(e.rem==='Separated'?' selected':'')+'>Separated</option></select></td>';
+h+='<td><button class="btn btn-sm btn-ghost" onclick="openEdE('+e.id+')">&#9999;</button><button class="btn btn-sm btn-ghost" onclick="delE('+e.id+')" style="color:var(--accent-red)">&times;</button></td></tr>'});
 h+='</tbody></table></div></div>';
-document.getElementById('tab-people').innerHTML=h;
-dc('pHC');CC['pHC']=new Chart(document.getElementById('pHC'),{type:'line',data:{labels:hcTrend.map(function(d){return d.p}),datasets:[{label:'Total',data:hcTrend.map(function(d){return d.t}),borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,.1)',fill:true,tension:.3,borderWidth:3,pointRadius:4,pointBackgroundColor:'#00d4aa'},{label:'F1',data:hcTrend.map(function(d){return d.f1}),borderColor:'#3B82F6',borderWidth:2,tension:.3,pointRadius:3},{label:'F2',data:hcTrend.map(function(d){return d.f2}),borderColor:'#F59E0B',borderWidth:2,tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:false},x:{grid:{display:false},ticks:{font:{size:10},maxRotation:45}}}}});
-var ad=hcTrend.filter(function(d){return d.a>0});dc('pAT');CC['pAT']=new Chart(document.getElementById('pAT'),{type:'bar',data:{labels:ad.map(function(d){return d.p}),datasets:[{data:ad.map(function(d){return d.a}),backgroundColor:ad.map(function(d){return d.a>=5?'#ff475799':d.a>=2?'#f0c04099':'#4a9eff99'}),borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{grid:{display:false}}}}});}
-function iEdit(id,f,v){var e=engineers.find(function(x){return x.id===id});if(!e)return;e[f]=v;syncEngineer(e);renderPeople()}
-function setPF(f){pFilter=f;renderPeople()}
+document.getElementById('tab-people').innerHTML=h;}
+function iEP(id,f,v){var e=E.find(function(x){return x.id===id});if(e){e[f]=v;refreshAll()}}
 
 /* ===== TAB 7: IMPORT ===== */
-function renderImport(){var h='<div class="grid-2-1 section-gap"><div class="panel"><div class="panel-title"><span class="dot"></span>Import</div><div class="upload-zone" id="dropZone" onclick="document.getElementById(\'importFile\').click()"><div class="icon">&#x1f4c2;</div><h4>Drop Excel/CSV or click</h4><p>Auto-detects schedule, revenue, output, roster</p></div><input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImport(this.files[0])"></div><div class="panel"><div class="panel-title"><span class="dot"></span>Log</div><div style="max-height:300px;overflow-y:auto">';
-if(!importLog.length)h+='<div style="text-align:center;padding:40px;color:var(--text-muted)">No imports yet.</div>';
-else importLog.forEach(function(l){h+='<div class="log-entry '+l.type+'"><span>'+(l.type==='success'?'&#x2705;':l.type==='error'?'&#x274c;':'&#x2139;&#xfe0f;')+'</span><strong>'+l.title+'</strong>: '+l.msg+'</div>'});
+function renderImport(){var h='<div class="page-header"><h1>Import Data</h1></div>';
+h+='<div class="grid-2 section-gap"><div class="panel"><div class="upload-zone" id="dZ" onclick="document.getElementById(\'iF\').click()"><div class="icon">&#x1f4c2;</div><h4>Drop or click</h4><p>Excel/CSV</p></div><input type="file" id="iF" accept=".xlsx,.xls,.csv" style="display:none" onchange="doImp(this.files[0])"></div>';
+h+='<div class="panel"><div class="pt"><span class="dot"></span>Log</div><div style="max-height:300px;overflow-y:auto">';
+if(!impLog.length)h+='<div style="text-align:center;padding:30px;color:var(--text-muted)">No imports</div>';
+else impLog.forEach(function(l){h+='<div class="log-entry '+l.t+'"><strong>'+l.ti+'</strong>: '+l.m+'</div>'});
 h+='</div></div></div>';document.getElementById('tab-import').innerHTML=h;
-var dz=document.getElementById('dropZone');if(dz){dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('dragover')});dz.addEventListener('dragleave',function(){dz.classList.remove('dragover')});dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('dragover');if(e.dataTransfer.files.length)handleImport(e.dataTransfer.files[0])})}}
-function addLog(t,ti,m){importLog.unshift({type:t,title:ti,msg:m});if(importLog.length>50)importLog.pop()}
-function handleImport(file){if(!file)return;addLog('info','File',file.name);var r=new FileReader();r.onload=function(e){try{var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});addLog('success','Parsed',wb.SheetNames.length+' sheets');wb.SheetNames.forEach(function(n){var l=n.toLowerCase();addLog(l.indexOf('schedule')>=0||l.indexOf('revenue')>=0?'success':'info',n,l.indexOf('schedule')>=0?'Schedule detected':l.indexOf('revenue')>=0?'Revenue detected':'Sheet found')});renderImport()}catch(err){addLog('error','Error',err.message);renderImport()}};r.readAsArrayBuffer(file)}
+var dz=document.getElementById('dZ');if(dz){dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('dragover')});dz.addEventListener('dragleave',function(){dz.classList.remove('dragover')});dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('dragover');if(e.dataTransfer.files.length)doImp(e.dataTransfer.files[0])})}}
+function doImp(f){if(!f)return;impLog.unshift({t:'info',ti:'File',m:f.name});var r=new FileReader();r.onload=function(e){try{var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});impLog.unshift({t:'success',ti:'OK',m:wb.SheetNames.join(', ')});renderImport()}catch(er){impLog.unshift({t:'error',ti:'Err',m:er.message});renderImport()}};r.readAsArrayBuffer(f)}
+
+/* ===== TAB 8: SETTINGS ===== */
+function renderSettings(){var h='<div class="page-header"><h1>Settings</h1></div>';
+h+='<div class="grid-2 section-gap"><div class="panel" style="padding:20px"><div class="pt"><span class="dot"></span>Supabase</div>';
+h+='<div class="fg"><label>URL</label><input class="ei" id="cfgU" placeholder="https://xxx.supabase.co"></div>';
+h+='<div class="fg"><label>Key</label><input class="ei" id="cfgK" type="password" placeholder="eyJ..."></div>';
+h+='<div class="config-row"><span class="config-label">Status</span><span class="conn-dot '+(sb?'on':'off')+'" id="cfgD"></span><span class="config-val" id="cfgT">'+(sb?'Connected':'Offline')+'</span>';
+h+='<button class="btn btn-sm btn-primary" onclick="var u=document.getElementById(\'cfgU\').value,k=document.getElementById(\'cfgK\').value;if(u&&k){initSB(u,k);saveCfg();toast(\'Connected!\');fetchAll()}else alert(\'Enter both\')">Test &amp; Connect</button></div></div>';
+h+='<div class="panel" style="padding:20px"><div class="pt"><span class="dot"></span>Info</div>';
+h+='<div class="config-row"><span class="config-label">WW</span><span class="config-val">FY starts 1st Mon Nov. Current: '+WW.current()+'</span></div>';
+h+='<div class="config-row"><span class="config-label">Employees</span><span class="config-val">'+E.length+' total, '+gA().length+' active</span></div>';
+h+='<button class="btn btn-primary" onclick="saveCfg();toast(\'Saved\')">Save Settings</button></div></div>';
+h+='<div class="panel section-gap" style="padding:20px"><div class="pt"><span class="dot"></span>Migration SQL</div><div class="sql-box">'+MSQL.replace(/</g,'&lt;')+'</div>';
+h+='<button class="btn btn-sm btn-ghost" style="margin-top:10px" onclick="navigator.clipboard.writeText(MSQL);toast(\'Copied!\')">Copy SQL</button></div>';
+document.getElementById('tab-settings').innerHTML=h;
+try{var c=JSON.parse(localStorage.getItem('erti4')||'{}');if(c.url)document.getElementById('cfgU').value=c.url;if(c.key)document.getElementById('cfgK').value=c.key}catch(e){}}
 
 /* ===== MODALS ===== */
-var editingId=null;
-function openAdd(){editingId=null;document.getElementById('modalTitle').textContent='Add Engineer';document.getElementById('empName').value='';document.getElementById('empTeam').value='F1-Legacy';document.getElementById('empRole').value='Engineer 1';document.getElementById('empComp').value='1';document.getElementById('empFlex').value='1';document.getElementById('empStatus').value='Active';document.getElementById('employeeModal').classList.add('open')}
-function openEdit(id){var e=engineers.find(function(x){return x.id===id});if(!e)return;editingId=id;document.getElementById('modalTitle').textContent='Edit';document.getElementById('empName').value=e.name;document.getElementById('empTeam').value=e.team;document.getElementById('empRole').value=e.role;document.getElementById('empComp').value=String(e.competency);document.getElementById('empFlex').value=String(e.flexibility);document.getElementById('empStatus').value=e.status;document.getElementById('employeeModal').classList.add('open')}
-function closeModal(id){document.getElementById(id).classList.remove('open');editingId=null}
-function saveEng(){var n=document.getElementById('empName').value.trim();if(!n){alert('Name required.');return}var d={name:n,team:document.getElementById('empTeam').value,role:document.getElementById('empRole').value,competency:parseInt(document.getElementById('empComp').value),flexibility:parseInt(document.getElementById('empFlex').value),status:document.getElementById('empStatus').value};if(editingId!==null){var e=engineers.find(function(x){return x.id===editingId});if(e){Object.assign(e,d);syncEngineer(e)}}else{var ne={id:nextId++,name:d.name,team:d.team,role:d.role,competency:d.competency,flexibility:d.flexibility,status:d.status,revenue:{apr:0,may:0,jun:0}};engineers.push(ne);syncEngineer(ne)}closeModal('employeeModal');refreshAll()}
-function delEng(id){var e=engineers.find(function(x){return x.id===id});if(!e||!confirm('Remove '+e.name+'?'))return;engineers=engineers.filter(function(x){return x.id!==id});refreshAll()}
-document.getElementById('modalSave').addEventListener('click',saveEng);
-document.getElementById('copySqlBtn').addEventListener('click',function(){navigator.clipboard.writeText(MIGRATION_SQL);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Copy SQL'},2000)});
+var edId=null;
+function openAddE(){edId=null;document.getElementById('emTitle').textContent='Add';document.getElementById('emL').value='';document.getElementById('emF').value='';document.getElementById('emN').value='';document.getElementById('emP').value='Engineer1';document.getElementById('emT').value='F1-LEGACY';document.getElementById('emH').value='';document.getElementById('emRs').value='';document.getElementById('emR').value='Regular';document.getElementById('empModal').classList.add('open')}
+function openEdE(id){var e=E.find(function(x){return x.id===id});if(!e)return;edId=id;document.getElementById('emTitle').textContent='Edit';document.getElementById('emL').value=e.last;document.getElementById('emF').value=e.first;document.getElementById('emN').value=e.no;document.getElementById('emP').value=e.pos;document.getElementById('emT').value=e.team;document.getElementById('emH').value=e.hired||'';document.getElementById('emRs').value=e.resigned||'';document.getElementById('emR').value=e.rem;document.getElementById('empModal').classList.add('open')}
+function saveEmp(){var l=document.getElementById('emL').value.trim(),f=document.getElementById('emF').value.trim();if(!l){alert('Name required');return}
+var d={no:document.getElementById('emN').value.trim(),last:l,first:f,name:l+', '+f,pos:document.getElementById('emP').value,team:document.getElementById('emT').value,hired:document.getElementById('emH').value,resigned:document.getElementById('emRs').value,tenure:'',rem:document.getElementById('emR').value};
+if(edId){var e=E.find(function(x){return x.id===edId});if(e)Object.assign(e,d)}else{d.id=nxId++;d.rev={};d.out={};E.push(d)}
+closeM('empModal');refreshAll()}
+function delE(id){var e=E.find(function(x){return x.id===id});if(!e||!confirm('Remove '+e.name+'?'))return;E=E.filter(function(x){return x.id!==id});refreshAll()}
+function closeM(id){document.getElementById(id).classList.remove('open');edId=null;spId=null}
 
 /* ===== NAV ===== */
-var tabMap={executive:renderExec,revenue:renderRev,output:renderOut,manpower:renderMan,skills:renderSkills,people:renderPeople,import:renderImport};
-var curTab='executive';
-document.querySelectorAll('.tab-btn').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.tab-btn').forEach(function(x){x.classList.remove('active')});document.querySelectorAll('.tab-content').forEach(function(x){x.classList.remove('active')});b.classList.add('active');var t=b.dataset.tab;document.getElementById('tab-'+t).classList.add('active');curTab=t;tabMap[t]()})});
-function refreshAll(){tabMap[curTab]()}
+var TM2={executive:renderExec,revenue:renderRev,output:renderOut,manpower:renderMan,skills:renderSkills,people:renderPeople,import:renderImport,settings:renderSettings};
+var cT='executive';
+document.querySelectorAll('.nav-item').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active')});document.querySelectorAll('.tab-content').forEach(function(x){x.classList.remove('active')});b.classList.add('active');var t=b.dataset.tab;document.getElementById('tab-'+t).classList.add('active');cT=t;TM2[t]()})});
+function refreshAll(){TM2[cT]()}
 
 /* ===== INIT ===== */
-console.log('[ERTI] Supabase global check:', typeof supabase, supabase ? 'createClient:'+typeof supabase.createClient : 'N/A');
 document.getElementById('wwBadge').textContent=WW.current();
-try{loadConfig()}catch(e){console.warn(e)}
+loadCfg();setTimeout(function(){if(sb)fetchAll()},500);
 renderExec();
 </script>
 </body>
