@@ -5,13 +5,13 @@ const { useState: useStateA, useEffect: useEffectA } = React;
 const NAV = [
   { id: 'overview', label: 'KPI Overview', icon: ICN.grid },
   { id: 'team', label: 'Team Leaderboard', icon: ICN.trophy },
-  { id: 'growth', label: 'Growth Tracker', icon: ICN.growth },
+  { id: 'growth', label: 'Experience Matrix', icon: ICN.growth },
 ];
 
 const TITLES = {
   overview: { crumb: 'PEOPLE OPS / DASHBOARD', title: 'KPI Overview' },
   team: { crumb: 'PEOPLE OPS / TEAM', title: 'Team Leaderboard' },
-  growth: { crumb: 'PEOPLE OPS / DEVELOPMENT', title: 'Growth Tracker' },
+  growth: { crumb: 'PEOPLE OPS / EXPERIENCE', title: 'Experience & Tenure' },
   person: { crumb: 'PEOPLE OPS / SCORECARD', title: 'Individual Scorecard' },
 };
 
@@ -39,7 +39,7 @@ function App() {
     document.querySelectorAll('.view').forEach(v => { v.style.padding = pad; });
   }, [t]);
 
-  const atRiskCount = data.PEOPLE.filter(p => p.risk === 'high').length;
+  const atRiskCount = data.PEOPLE.filter(p => p.status === 'Probationary').length;
 
   const openPerson = (p) => { setPerson(p); setView('person'); document.querySelector('.view').scrollTop = 0; };
   const nav = (id) => { setView(id); setPerson(null); const v = document.querySelector('.view'); if (v) v.scrollTop = 0; };
@@ -70,7 +70,7 @@ function App() {
             </button>
           ))}
           <div className="side-sect">Roster</div>
-          {[...data.PEOPLE].sort((a, b) => b.composite - a.composite).slice(0, 6).map(p => (
+          {[...data.PEOPLE].sort((a, b) => b.outputs - a.outputs).slice(0, 6).map(p => (
             <button key={p.id} className={'nav-item' + (person && person.id === p.id ? ' active' : '')} onClick={() => openPerson(p)}>
               <Avatar p={p} sm />
               <span style={{ fontSize: 12.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>

@@ -1,30 +1,20 @@
-// person.jsx — individual scorecard deep-dive
-
-function metricColor(v, avg, lowerBetter) {
-  const good = lowerBetter ? v < avg : v > avg;
-  return good ? 'var(--ok)' : v === avg ? 'var(--fg-3)' : 'var(--warn)';
-}
+// person.jsx — individual scorecard (operational; real ERTI data)
 
 function Person({ data, person, onBack, onSelect }) {
-  const { PEOPLE, SKILLS } = data;
+  const { PEOPLE, SKILLS } = data; // SKILLS = build-type axes
   const p = person;
   const avg = k => Math.round(PEOPLE.reduce((s, x) => s + x[k], 0) / PEOPLE.length);
 
   const metrics = [
-    { label: 'Test Throughput', key: 'throughput', val: p.throughput, max: 220, suffix: ' runs', tavg: avg('throughput') },
-    { label: 'First-Pass Yield', key: 'fpy', val: p.fpy, max: 100, suffix: '%', tavg: avg('fpy') },
-    { label: 'Bench Utilization', key: 'utilization', val: p.utilization, max: 100, suffix: '%', tavg: avg('utilization') },
-    { label: 'OKR Completion', key: 'goals', val: p.goals, max: 100, suffix: '%', tavg: avg('goals') },
-    { label: 'Training Progress', key: 'training', val: p.training, max: 100, suffix: '%', tavg: avg('training') },
-    { label: 'Attendance', key: 'attendance', val: p.attendance, max: 100, suffix: '%', tavg: avg('attendance') },
+    { label: 'Attributed Outputs', val: p.outputs, max: Math.max(...PEOPLE.map(x => x.outputs), 1), suffix: '', tavg: avg('outputs') },
+    { label: 'Release Rate', val: p.releasePct, max: 100, suffix: '%', tavg: avg('releasePct') },
+    { label: 'Shift Load', val: p.shiftLoad, max: 100, suffix: '%', tavg: avg('shiftLoad') },
+    { label: 'Build Types', val: p.buildTypes, max: 5, suffix: '', tavg: avg('buildTypes') },
   ];
 
-  const skillAxes = ['Auto', 'Debug', 'Data', 'Rel', 'Safety', 'Report', 'Tooling', 'Mentor'];
-  const readyCls = p.readiness === 'Ready now' ? 'now' : p.readiness.includes('6') ? 'soon' : 'later';
-
-  // peers in same squad for context
-  const peers = PEOPLE.filter(x => x.squad === p.squad && x.id !== p.id).sort((a, b) => b.composite - a.composite).slice(0, 4);
-  const rankAll = [...PEOPLE].sort((a, b) => b.composite - a.composite).findIndex(x => x.id === p.id) + 1;
+  const radarAxes = ['TC', 'FP', 'PB', 'HI', 'Oth'];
+  const peers = PEOPLE.filter(x => x.squad === p.squad && x.id !== p.id).sort((a, b) => b.outputs - a.outputs).slice(0, 4);
+  const rankAll = [...PEOPLE].sort((a, b) => b.outputs - a.outputs).findIndex(x => x.id === p.id) + 1;
 
   return (
     <div className="view-inner">
@@ -37,44 +27,45 @@ function Person({ data, person, onBack, onSelect }) {
             <Avatar p={p} lg />
             <div className="meta">
               <span className="nm">{p.name}</span>
-              <span className="rl">{p.role} · {p.tenure} yrs tenure</span>
+              <span className="rl">{p.role} · F2-{p.squad} · {p.tenure} yrs tenure</span>
               <div className="tags">
                 <SquadTag s={p.squad} />
                 <span className="tag lvl">{p.level}</span>
-                <RiskDot r={p.risk} />
+                <StatusTag s={p.status} />
+                {p.inferred && <span className="tag" style={{ fontSize: 9 }}>inferred join</span>}
               </div>
             </div>
             <div className="bigscore">
               <div className="row gap-8" style={{ justifyContent: 'flex-end', alignItems: 'baseline' }}>
-                <span className="v">{p.composite}</span>
+                <span className="v">{p.activity}</span>
                 <Delta d={p.delta} />
               </div>
-              <div className="l">composite · rank #{rankAll} of {PEOPLE.length}</div>
+              <div className="l">activity index · #{rankAll} of {PEOPLE.length} by output</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* trend + radar */}
+      {/* trend + build radar */}
       <div className="grid g-2-1">
         <div className="card fade">
-          <div className="card-head"><h3><Icon d={ICN.pulse} /> Performance Trend</h3><span className="sub">composite · 6-mo</span></div>
+          <div className="card-head"><h3><Icon d={ICN.pulse} /> Cumulative Output</h3><span className="sub">by work-week · sample</span></div>
           <div className="card-body">
-            <AreaTrend data={p.hist} labels={data.MONTHS} fmt={v => v} color="var(--accent)" h={180} />
+            <AreaTrend data={p.hist} labels={['', '', '', '', '', 'now']} fmt={v => v} color="var(--accent)" h={180} />
           </div>
         </div>
         <div className="card fade">
-          <div className="card-head"><h3><Icon d={ICN.spark} /> Skill Profile</h3></div>
+          <div className="card-head"><h3><Icon d={ICN.spark} /> Build-Type Experience</h3></div>
           <div className="card-body" style={{ display: 'grid', placeItems: 'center', paddingBottom: 8 }}>
-            <Radar axes={skillAxes} values={p.skills} max={4} size={220} />
+            <Radar axes={radarAxes} values={p.skills} max={4} size={220} />
           </div>
         </div>
       </div>
 
-      {/* metric breakdown */}
+      {/* metric breakdown + experience */}
       <div className="grid g-2">
         <div className="card fade">
-          <div className="card-head"><h3><Icon d={ICN.target} /> KPI Breakdown</h3><span className="sub">vs team avg</span></div>
+          <div className="card-head"><h3><Icon d={ICN.target} /> Output Metrics</h3><span className="sub">vs team avg</span></div>
           <div className="card-body">
             {metrics.map((m, i) => {
               const pct = Math.min(100, (m.val / m.max) * 100);
@@ -99,37 +90,35 @@ function Person({ data, person, onBack, onSelect }) {
           </div>
         </div>
 
-        {/* growth panel */}
         <div className="card fade">
-          <div className="card-head"><h3><Icon d={ICN.growth} /> Growth & Development</h3></div>
+          <div className="card-head"><h3><Icon d={ICN.growth} /> Experience & Tenure</h3></div>
           <div className="card-body col" style={{ gap: 16 }}>
             <div className="grid g-2" style={{ gap: 12 }}>
               <div className="kpi" style={{ padding: 14 }}>
-                <span className="kpi-label">Promotion Readiness</span>
+                <span className="kpi-label">Tenure Band</span>
                 <div className="row between" style={{ marginTop: 2 }}>
-                  <span className={'ready ' + readyCls}>{p.readiness}</span>
+                  <span className={'ready ' + (p.status === 'Probationary' ? 'later' : p.tenure >= 2 ? 'now' : 'soon')}>{p.tenureBand}</span>
                 </div>
-                <span className="muted-s" style={{ textTransform: 'none' }}>→ {p.nextRole}</span>
+                <span className="muted-s" style={{ textTransform: 'none' }}>hired {p.hired}</span>
               </div>
               <div className="kpi" style={{ padding: 14, alignItems: 'center', flexDirection: 'row', gap: 14 }}>
-                <Ring value={p.training} label={p.training + '%'} sub="training" size={72} />
+                <Ring value={p.shiftLoad} label={p.shiftLoad + '%'} sub="shift load" size={72} />
                 <div className="col" style={{ gap: 2 }}>
-                  <span style={{ fontSize: 18, fontWeight: 500 }}>{p.certs}</span>
-                  <span className="muted-s" style={{ textTransform: 'none' }}>certifications</span>
+                  <span style={{ fontSize: 18, fontWeight: 500 }}>{p.shifts.DS + p.shifts.NS}</span>
+                  <span className="muted-s" style={{ textTransform: 'none' }}>shifts / 14d</span>
                 </div>
               </div>
             </div>
 
-            {/* skill bars detail */}
             <div className="col" style={{ gap: 2 }}>
-              <span className="muted-s" style={{ marginBottom: 4 }}>Skill proficiency</span>
+              <span className="muted-s" style={{ marginBottom: 4 }}>Build-type experience (output volume)</span>
               {SKILLS.map((sk, i) => (
                 <div className="bar-row" key={i} style={{ gridTemplateColumns: '128px 1fr 64px', padding: '5px 0' }}>
                   <span className="bl" style={{ fontSize: 12 }}>{sk}</span>
                   <div className="pips">
                     {[0, 1, 2, 3].map(n => <span key={n} className={'pip' + (n < p.skills[i] ? ' on' : '')}></span>)}
                   </div>
-                  <span className="bv">{['—', 'Learning', 'Proficient', 'Advanced', 'Expert'][p.skills[i]]}</span>
+                  <span className="bv">{(p.buildMix[sk] || 0) + ' out'}</span>
                 </div>
               ))}
             </div>
@@ -137,12 +126,12 @@ function Person({ data, person, onBack, onSelect }) {
         </div>
       </div>
 
-      {/* manager note + peers */}
+      {/* summary + peers */}
       <div className="grid g-2-1">
         <div className="card fade">
-          <div className="card-head"><h3><Icon d={ICN.user} /> Manager Note · Latest 1:1</h3></div>
+          <div className="card-head"><h3><Icon d={ICN.user} /> Activity Summary</h3></div>
           <div className="card-body">
-            <div className="callout"><strong>{p.name.split(' ')[0]}</strong> — {p.note}</div>
+            <div className="callout"><strong>{p.name.split(' ')[0]}</strong> — {p.note} Top platform: {p.topTester}. Shifts (14d): {p.shifts.DS} day · {p.shifts.NS} night · {p.shifts.NT} NT.</div>
           </div>
         </div>
         <div className="card fade">
@@ -152,7 +141,7 @@ function Person({ data, person, onBack, onSelect }) {
               <div className="lrow" key={x.id} onClick={() => onSelect(x)} style={{ cursor: 'pointer' }}>
                 <Avatar p={x} sm />
                 <span style={{ flex: 1, fontSize: 12.5, fontWeight: 500 }}>{x.name}</span>
-                <ScoreChip s={x.composite} />
+                <span className="muted-s">{x.outputs} out</span>
               </div>
             ))}
           </div>

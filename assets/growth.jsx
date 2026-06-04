@@ -1,58 +1,59 @@
-// growth.jsx — team growth, skills matrix, promotion pipeline
+// growth.jsx — experience matrix, tenure pipeline, output distribution (real data)
 
 const { useState: useStateG } = React;
 
 const HEAT_COLORS = ['#1f2328', '#5a4a18', '#8a6300', '#c79100', '#ffb800'];
-const PROF_LABELS = ['None', 'Learning', 'Proficient', 'Advanced', 'Expert'];
+const EXP_LABELS = ['None', '1', '2–3', '4–5', '6+']; // output-volume bands
 
 function Growth({ data, onSelect }) {
-  const { PEOPLE, SKILLS } = data;
+  const { PEOPLE, SKILLS } = data; // SKILLS = build-type axes
   const [tip, setTip] = useStateG(null);
 
-  // Short skill labels for column heads
-  const shortSkills = ['Test\nAuto', 'HW\nDebug', 'Data\nAnalysis', 'Rel.\nMethods', 'Lab\nSafety', 'Report', 'Tooling\n/Script', 'Mentor'];
-
-  // promotion pipeline buckets
+  // tenure / status pipeline
   const buckets = [
-    { key: 'Ready now', label: 'Ready now', cls: 'now' },
-    { key: '6–12 mo', label: '6–12 months', cls: 'soon' },
-    { key: '12–18 mo', label: '12–18 months', cls: 'soon' },
-    { key: 'Not yet', label: 'Building', cls: 'later' },
+    { key: 'Probationary', label: 'Probationary', cls: 'later', test: p => p.status === 'Probationary' },
+    { key: '<1 yr', label: '< 1 yr', cls: 'soon', test: p => p.status !== 'Probationary' && p.tenure < 1 },
+    { key: '1–2 yr', label: '1–2 yr', cls: 'soon', test: p => p.tenure >= 1 && p.tenure < 2 },
+    { key: '2 yr+', label: '2 yr+', cls: 'now', test: p => p.tenure >= 2 },
   ];
-  const pipeline = buckets.map(b => ({ ...b, people: PEOPLE.filter(p => p.readiness === b.key) }));
+  const pipeline = buckets.map(b => ({ ...b, people: PEOPLE.filter(b.test) }));
 
-  // score distribution
+  // output distribution
   const bins = [
-    { label: '<75', lo: 0, hi: 74 },
-    { label: '75–79', lo: 75, hi: 79 },
-    { label: '80–84', lo: 80, hi: 84 },
-    { label: '85–89', lo: 85, hi: 89 },
-    { label: '90+', lo: 90, hi: 100 },
+    { label: '0', lo: 0, hi: 0 }, { label: '1–2', lo: 1, hi: 2 }, { label: '3–5', lo: 3, hi: 5 },
+    { label: '6–8', lo: 6, hi: 8 }, { label: '9+', lo: 9, hi: 999 },
   ];
-  const dist = bins.map(b => ({ ...b, n: PEOPLE.filter(p => p.composite >= b.lo && p.composite <= b.hi).length }));
+  const dist = bins.map(b => ({ ...b, n: PEOPLE.filter(p => p.outputs >= b.lo && p.outputs <= b.hi).length }));
   const maxBin = Math.max(...dist.map(d => d.n));
 
-  // skill team averages
+  // team build-type volume + avg experience level
+  const buildVol = SKILLS.map((_, si) => PEOPLE.reduce((s, p) => s + (p.buildMix[SKILLS[si]] || 0), 0));
+  const maxVol = Math.max(...buildVol, 1);
   const skillAvg = SKILLS.map((_, si) => +(PEOPLE.reduce((s, p) => s + p.skills[si], 0) / PEOPLE.length).toFixed(1));
-  const totalCerts = PEOPLE.reduce((s, p) => s + p.certs, 0);
-  const sortedHeat = [...PEOPLE].sort((a, b) => b.composite - a.composite);
+  const prob = PEOPLE.filter(p => p.status === 'Probationary').length;
+  const sortedHeat = [...PEOPLE].sort((a, b) => b.outputs - a.outputs);
+  const shortSkills = ['Test\ncard', 'Face\nplate', 'Perf\nboard', 'Handler\n/Insert', 'Other'];
 
   return (
     <div className="view-inner">
-      {/* summary */}
-      <div className="grid g-4">
-        <div className="kpi"><span className="kpi-label"><Icon d={ICN.growth} size={14} /> Promo-ready now</span><div className="kpi-val">{pipeline[0].people.length}</div><span className="muted-s">awaiting calibration</span></div>
-        <div className="kpi"><span className="kpi-label"><Icon d={ICN.cert} size={14} /> Total certs</span><div className="kpi-val">{totalCerts}</div><span className="muted-s">{(totalCerts / PEOPLE.length).toFixed(1)} per person</span></div>
-        <div className="kpi"><span className="kpi-label"><Icon d={ICN.spark} size={14} /> Avg training</span><div className="kpi-val">{Math.round(PEOPLE.reduce((s, p) => s + p.training, 0) / PEOPLE.length)}%</div><div className="meter"><div className="f" style={{ width: Math.round(PEOPLE.reduce((s, p) => s + p.training, 0) / PEOPLE.length) + '%' }}></div></div></div>
-        <div className="kpi"><span className="kpi-label"><Icon d={ICN.star} size={14} /> Skill gaps</span><div className="kpi-val">{skillAvg.filter(s => s < 2.5).length}</div><span className="muted-s">areas below proficient</span></div>
+      <div className="callout" style={{ marginBottom: 4 }}>
+        <strong>Experience by build type</strong> = volume of attributed debug output per hardware type (real, from the Sheet 5 sample). Tenure/status are from the roster. This view carries no skills-proficiency or promotion-readiness assessment — the source has none.
       </div>
 
-      {/* skills heatmap */}
+      {/* summary */}
+      <div className="grid g-4">
+        <div className="kpi"><span className="kpi-label"><Icon d={ICN.user} size={14} /> Headcount</span><div className="kpi-val">{PEOPLE.length}</div><span className="muted-s">{prob} probationary</span></div>
+        <div className="kpi"><span className="kpi-label"><Icon d={ICN.layers} size={14} /> Build types covered</span><div className="kpi-val">{SKILLS.filter((_, i) => buildVol[i] > 0).length}</div><span className="muted-s">of {SKILLS.length}</span></div>
+        <div className="kpi"><span className="kpi-label"><Icon d={ICN.spark} size={14} /> Avg shift load</span><div className="kpi-val">{Math.round(PEOPLE.reduce((s, p) => s + p.shiftLoad, 0) / PEOPLE.length)}%</div><div className="meter"><div className="f" style={{ width: Math.round(PEOPLE.reduce((s, p) => s + p.shiftLoad, 0) / PEOPLE.length) + '%' }}></div></div></div>
+        <div className="kpi"><span className="kpi-label"><Icon d={ICN.star} size={14} /> Coverage gaps</span><div className="kpi-val">{skillAvg.filter(s => s < 1).length}</div><span className="muted-s">build types thinly staffed</span></div>
+      </div>
+
+      {/* experience heatmap */}
       <div className="card fade">
         <div className="card-head">
-          <h3><Icon d={ICN.layers} /> Skills Matrix</h3>
+          <h3><Icon d={ICN.layers} /> Build-Type Experience Matrix</h3>
           <div className="legend">
-            {PROF_LABELS.map((l, i) => <span key={i}><span className="sw" style={{ background: HEAT_COLORS[i] }}></span>{l}</span>)}
+            {EXP_LABELS.map((l, i) => <span key={i}><span className="sw" style={{ background: HEAT_COLORS[i] }}></span>{l}</span>)}
           </div>
         </div>
         <div className="card-body" style={{ overflowX: 'auto' }}>
@@ -74,21 +75,15 @@ function Growth({ data, onSelect }) {
                   {p.skills.map((v, si) => (
                     <td key={si}>
                       <div className="cell" style={{ background: HEAT_COLORS[v] }}
-                           onMouseEnter={e => setTip({ x: e.clientX, y: e.clientY, t: SKILLS[si], v: PROF_LABELS[v], who: p.name })}
+                           onMouseEnter={e => setTip({ x: e.clientX, y: e.clientY, t: SKILLS[si], v: (p.buildMix[SKILLS[si]] || 0) + ' outputs', who: p.name })}
                            onMouseMove={e => setTip(t => t && { ...t, x: e.clientX, y: e.clientY })}
                            onMouseLeave={() => setTip(null)}>
-                        {v > 0 ? v : ''}
+                        {p.buildMix[SKILLS[si]] || ''}
                       </div>
                     </td>
                   ))}
                 </tr>
               ))}
-              <tr>
-                <td className="rowh"><span className="muted-s" style={{ paddingLeft: 35 }}>Team avg</span></td>
-                {skillAvg.map((a, i) => (
-                  <td key={i}><div className="cell" style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--fg-3)', fontWeight: 500 }}>{a}</div></td>
-                ))}
-              </tr>
             </tbody>
           </table>
         </div>
@@ -97,7 +92,7 @@ function Growth({ data, onSelect }) {
       {/* pipeline + distribution */}
       <div className="grid g-2-1">
         <div className="card fade">
-          <div className="card-head"><h3><Icon d={ICN.growth} /> Promotion Pipeline</h3><span className="sub">{PEOPLE.length} people · 4 stages</span></div>
+          <div className="card-head"><h3><Icon d={ICN.growth} /> Tenure & Status</h3><span className="sub">{PEOPLE.length} people · 4 bands</span></div>
           <div className="card-body">
             <div className="grid g-4" style={{ gap: 12 }}>
               {pipeline.map(b => (
@@ -113,7 +108,7 @@ function Growth({ data, onSelect }) {
                         <Avatar p={p} sm />
                         <div className="col" style={{ minWidth: 0, flex: 1 }}>
                           <span style={{ fontSize: 11.5, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
-                          <span className="muted-s" style={{ fontSize: 9.5 }}>{p.level} → {p.nextRole}</span>
+                          <span className="muted-s" style={{ fontSize: 9.5 }}>{p.level} · {p.role}</span>
                         </div>
                       </div>
                     ))}
@@ -126,7 +121,7 @@ function Growth({ data, onSelect }) {
         </div>
 
         <div className="card fade">
-          <div className="card-head"><h3><Icon d={ICN.star} /> Score Distribution</h3></div>
+          <div className="card-head"><h3><Icon d={ICN.star} /> Output Distribution</h3></div>
           <div className="card-body col" style={{ gap: 18 }}>
             <div className="dist">
               {dist.map((d, i) => (
@@ -138,12 +133,12 @@ function Growth({ data, onSelect }) {
               ))}
             </div>
             <div className="col" style={{ gap: 0 }}>
-              <span className="muted-s" style={{ marginBottom: 6 }}>Team skill strengths</span>
+              <span className="muted-s" style={{ marginBottom: 6 }}>Team build-type volume</span>
               {SKILLS.map((sk, i) => (
                 <div className="bar-row" key={i} style={{ gridTemplateColumns: '128px 1fr 30px', padding: '5px 0' }}>
                   <span className="bl" style={{ fontSize: 11.5 }}>{sk}</span>
-                  <div className="bar-track"><div className="bf" style={{ width: (skillAvg[i] / 4) * 100 + '%' }}></div></div>
-                  <span className="bv">{skillAvg[i]}</span>
+                  <div className="bar-track"><div className="bf" style={{ width: (buildVol[i] / maxVol) * 100 + '%' }}></div></div>
+                  <span className="bv">{buildVol[i]}</span>
                 </div>
               ))}
             </div>
