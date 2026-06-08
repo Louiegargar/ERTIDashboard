@@ -1,69 +1,75 @@
-# CK Ethernet Cable Pricing — Dashboard
+# ERTI Debug Nerve Center — Operations Dashboard
 
-A high-density, interactive pricing dashboard for Cleerline/CK's ethernet cable
-catalog (~170 SKUs across 14 families). Built on the **MetaPartCrawler** design
-system (dark, amber-accent, monospace-numerics).
+Multi-file, no-build React app implementing the *Operations Dashboard Revision &
+Enhancement Framework v1.0*. Vanilla React + Babel-standalone (no bundler), Chart.js,
+SheetJS, Supabase JS — all via CDN. Plus a dependency-free **Python engine twin**.
+Currency: Philippine Peso (₱).
 
-The recommendation engine prices every SKU through four stacked layers and
-composites them:
-
-| Layer | Name | What it does |
-|-------|------|--------------|
-| **L1** | Cost Floor | `cost × (1 + min_margin)` — a hard minimum |
-| **L2** | Competitive Median | median of scraped MP / FS / CW comps — market anchor |
-| **L3** | Family Curve | power-law fit `price(length)` — internal price shape |
-| **L4** | Velocity × Posture | strategy nudge by sell-through and family stance |
-
-`recommended = max(L1, weighted_mean(L2, L3, L4))`
-
----
+## Run it
+- **Quick look:** open `ERTI_Nerve_Center_preview.html` (everything inlined; needs internet for the CDN libs on first load).
+- **Real app:** serve the folder over HTTP and open `ERTI Nerve Center.html`
+  (`python3 -m http.server` in this directory, then visit the file). Opening the
+  multi-file version via `file://` fails because browsers block fetching the
+  `assets/*.jsx` modules — use a static server or the inlined preview.
+- **Batch / CI:** `python3 engine.py` (portfolio summary), `--period 2025-08`,
+  `--weekly --period WW2542`, `--json out.json`, `--csv out.csv`.
 
 ## File map
-
-The build is deliberately split so each concern stays editable in isolation.
-
-| File | Role |
-|------|------|
-| `index.html` | Entry point — loads React, Babel, then every module below |
-| `app.css` | All styling — design-system tokens + component styles |
-| `data.jsx` | **Data + engine layer** — catalog generator, four-layer engine, curve fit, audit log (`window.CK`) |
-| `ui.jsx` | Shared primitives — icons, formatters, badges, `Select`, `Seg`, `Modal`, toasts |
-| `charts.jsx` | Pure-SVG interactive charts — time series, family curve, scatter, donut, bar, sparkline, heatmap |
-| `tab-action.jsx` | **Action Center** — sortable/filterable recommendation table with expandable layer breakdowns + bulk approve |
-| `tab-heatmap.jsx` | **Family × Length heatmap** with switchable metrics |
-| `tab-detail.jsx` | **SKU Detail** — comp history, curve position, color variants, audit trail |
-| `tab-overrides.jsx` | **Manual Overrides** register |
-| `tab-quality.jsx` | **Data Quality** — flag groups by severity |
-| `tab-kpi.jsx` | **KPI Summary** — portfolio rollups and distributions |
-| `tab-config.jsx` | **Configuration** — live engine weights/thresholds with a simulate-and-promote scenario mode |
-| `app.jsx` | App shell — sidebar nav, topbar, routing, modals |
-| `engine.py` | **Standalone Python port of the engine** — the back-office source of truth |
-
-### Why a Python file?
-
-The same four-layer math that powers the live dashboard is implemented as a
-dependency-free Python module (`engine.py`) so it can run in a batch/back-office
-context — regenerating the catalog, scoring every SKU, and exporting JSON or CSV
-that the dashboard could consume directly.
-
-```bash
-python engine.py                 # portfolio summary to stdout
-python engine.py --sku PC6N10    # explain one SKU's L1–L4 breakdown
-python engine.py --json out.json # full SKU + recommendation payload
-python engine.py --csv  out.csv  # flat recommendation table
-python engine.py --simulate-event --min-margin 0.35   # tweak engine config
+```
+ERTI Nerve Center.html      entry; loads CDN libs + assets in order
+engine.py                   standalone KPI engine (mirrors assets/engine.js)
+MIGRATION.sql               Appendix A — new/changed Supabase tables
+assets/
+  app.css                   design system (Appendix D tokens, teal #00d4aa)
+  ww.js                     workweek engine (FY = 1st Monday of Nov, WWyyww)
+  store.js                  in-memory DB + localStorage + Supabase debounced auto-push (§7.2)
+  engine.js                 KPI layer: period engine, actuals, plan, gaps, WIP, manning, competency (§9)
+  seed.js                   real ERTI data seeded on first run
+  ui.jsx                    formatters, icons, useStore hook, KpiCard/Panel/Modal/Seg/Tile/Toast
+  charts.jsx               Chart.js wrappers (Combo/Gap/Line/Aging/Manning/Radar), guarded
+  kpi-modal.jsx            reusable KPI drill-down + KPI_MODAL config (§8.2)
+  tab-executive.jsx        Executive Pulse — 9 clickable KPIs + anchor trends + team rollup (§8.1)
+  tab-revenue.jsx          price book + team budgets + output targets entry (§8.3)
+  tab-output.jsx           record-level output entry, filters, add/edit modal (§8.4)
+  tab-wip.jsx              WIP inventory, aging, Complete→Output loop (§8.5)
+  tab-manpower.jsx         manning capacity + editable shift calendar (§8.6)
+  tab-skills.jsx           platform experience ratings + competency radar (§8.7)
+  tab-people.jsx           roster CRUD, Appendix B applied (§8.8)
+  tab-import.jsx           SheetJS import + entity mapping + log (§8.9)
+  tab-settings.jsx         Supabase connect, migration SQL, sync + §10 params (§8.10)
+  app.jsx                  shell: sidebar nav, routing, init, mount
 ```
 
-The deterministic RNG, family definitions, posture/velocity multipliers, and
-composite logic are kept byte-aligned with `data.jsx` so a batch run and the
-in-browser model agree.
+## Data model
+New tables `output_records`, `wip_inventory`, `output_targets` (Appendix A). One row per
+board; revenue and all plan-vs-actual gaps are **derived through the price book**, never
+re-entered. Offline-first: the app runs from `localStorage` (`erti_nerve_v1`) with no
+connection; connecting in Settings pulls all tables and turns on debounced auto-push.
 
----
+## What is real vs placeholder
+**Real (from your sheets):** roster (Appendix B + Mariel Perea), 46 output records
+(Sheet 5 subset, owner→engineer via alias map), 6 WIP items (real PEA/PM boards),
+103 schedule entries (the 14-day window), platform ratings derived as an *experience
+index* from real output volume.
 
-## Interaction highlights
+**Placeholder — replace before relying on revenue/plan KPIs:**
+- **Price book** (`seed.js` / Revenue tab) — flagged `placeholder`; editing clears the flag.
+- **Output targets** — sample budget/projected for 4 months only.
+- **Team budgets & manning targets** — placeholder figures.
 
-- **Inline approve / defer / reject / override** on every recommendation row
-- **Bulk approve** with a portfolio-impact preview (avg MSRP, GM%, projected revenue, confidence breakdown)
-- **Live engine config** — drag the layer weights and thresholds, simulate the result against the current book, then promote the scenario
-- **Expandable rows** revealing the four-layer math, competitor comps, and the family power-law curve with this SKU highlighted
-- **Cross-tab navigation** — heatmap cells and KPI segments deep-link into filtered views and SKU detail
+## Appendix E decisions (defaults used; change in seed/Settings)
+- **E1 TX Category** — treated as tester/platform family (ETS, LTX, FLEX, CTS, NI, AERO, EAGLE).
+- **E2 Target granularity** — org-wide `'ALL'`; per-team supported by the schema/engine.
+- **E3 Projection** — `run_rate`; others selectable in Settings.
+- **E4 Gargar (2400036) team** — seeded **F2-LTX** per the new sheet; confirm vs E[]'s F2-ETS/LTX.
+- **E5 qty** — allowed, default 1.
+- **E6 Monthly** — calendar month of the WW Monday.
+- **E7 Aging** — 0–3 / 4–7 / 8–14 / 15+ days, flag at 8.
+- **E8 WIP completion** — auto-creates one `output_record` with a no-double-count guard.
+
+## Open items to confirm
+- **Mariel Perea (1702788)** appears in the output data but is **not in Appendix B**.
+  Seeded as F2-LTX so attribution works — confirm her record and team.
+- **Juno → Junolito Lomeda (2200007)** and **Aeron → Aaron Gloriani (2500060)** are
+  inferred owner-alias joins; both are ETS-rostered but appear on LTX/perfboard work.
+- Replace all placeholder prices/targets/budgets/manning with real figures.
