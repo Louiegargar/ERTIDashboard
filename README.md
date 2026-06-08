@@ -73,3 +73,36 @@ index* from real output volume.
 - **Juno → Junolito Lomeda (2200007)** and **Aeron → Aaron Gloriani (2500060)** are
   inferred owner-alias joins; both are ETS-rostered but appear on LTX/perfboard work.
 - Replace all placeholder prices/targets/budgets/manning with real figures.
+
+## Session 2 — bug fixes & new features
+**Fixes**
+- **Migration SQL** is now self-contained: it creates the retained tables
+  (`engineers`, `price_settings`, `team_budgets`, `manning_targets`,
+  `platform_ratings`, `schedule_entries`, `app_settings`) *before* the new ones,
+  so the FK to `engineers(id)` resolves on a fresh project. Use `MIGRATION.sql`
+  (also copyable from Settings).
+- **Import** now shows a **column-mapping** step with auto-guessed matches and
+  reports committed / duplicate-skipped / invalid counts via toast + log. The
+  earlier silent no-op was a header-name mismatch (e.g. `Hardware ID` vs
+  `hardware_id`) — mapping fixes that.
+
+**New**
+- `assets/supabase-config.js` — bake your project `url` + anon `key`; when set,
+  the app auto-connects and **pulls all tables on every load** (empty cloud tables
+  never overwrite the local seed).
+- **Loading banner** — an instant boot splash (in `index.html`) plus an in-app
+  `Banner` shown during fetch/flush; both fade out when work completes.
+- **WIP → Snap** — the *Snap WIP* button captures current WIP numbers (total,
+  aged, by status/tester/hardware/team) for the current workweek into
+  `wip_snapshots` (upsert by `period_key`) and pushes to Supabase.
+- **WIP Trend per workweek** — interactive; bars = active WIP, line = aged. Uses
+  the snapped number for any week that has a snapshot, otherwise computes WIP
+  active during that week from `debug_start`/`debug_end`. Click a week to inspect
+  its items (and snapshot breakdown if present). *Becomes more meaningful as boards
+  close and weekly snaps accumulate; with the current seed (old still-open boards)
+  it reads flat.*
+- **Aging Distribution** — full-size and clickable; click a bucket bar to list the
+  items in it.
+- **WIP donut** — switch the grouping between Focus Factory (team), Status, Tester
+  (TX category), and Hardware Type; click a slice (or legend row) to list its items.
+- New table `wip_snapshots` added to `MIGRATION.sql` and the sync set.

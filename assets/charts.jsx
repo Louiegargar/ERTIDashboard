@@ -72,3 +72,43 @@ function CompetencyRadar({axes,values,h}){
   return <div style={{height:h||220}}><canvas ref={ref}></canvas></div>; }
 
 Object.assign(window,{Combo,GapBars,LineVs,AgingBars,ManningBars,CompetencyRadar});
+
+// ── interactive variants (appended) ──
+const PALETTE=[TEAL,BLUE,GOLD,GREEN,RED,'#a55eea','#ff9f43','#26d0ce','#5f27cd','#10ac84'];
+
+// clickable bar chart (used for aging) — onPick(index)
+function ClickBars({labels,data,colors,onPick,h}){
+  const ref=useChart(()=>({ type:'bar',
+    data:{ labels, datasets:[{ label:'WIP items', data, backgroundColor:colors||labels.map((_,i)=>PALETTE[i%PALETTE.length]), borderRadius:4 }]},
+    options:Object.assign(baseOpts(null),{ onClick:(e,els)=>{ if(els.length&&onPick)onPick(els[0].index); },
+      onHover:(e,els)=>{ e.native.target.style.cursor=els.length?'pointer':'default'; },
+      plugins:{ legend:{display:false} } }) }), [JSON.stringify([labels,data])]);
+  if(!HAS_CHART()) return <NoChart h={h}/>;
+  return <div style={{height:h||300}}><canvas ref={ref}></canvas></div>; }
+
+// customizable donut — onPick(label)
+function Donut({labels,data,onPick,h}){
+  const colors=labels.map((_,i)=>PALETTE[i%PALETTE.length]);
+  const ref=useChart(()=>({ type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor:colors, borderColor:'#1e2228', borderWidth:2, hoverOffset:6 }]},
+    options:{ responsive:true,maintainAspectRatio:false,cutout:'62%',
+      onClick:(e,els)=>{ if(els.length&&onPick)onPick(labels[els[0].index]); },
+      onHover:(e,els)=>{ e.native.target.style.cursor=els.length?'pointer':'default'; },
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>c.label+': '+c.parsed+' ('+Math.round(c.parsed/data.reduce((a,b)=>a+b,0)*100||0)+'%)' } } } } }),
+    [JSON.stringify([labels,data])]);
+  if(!HAS_CHART()) return <NoChart h={h}/>;
+  return <div className="donut-wrap" style={{height:h||280}}><canvas ref={ref}></canvas></div>; }
+
+// interactive WIP trend per workweek (bars=total, line=aged) — onPick(index)
+function WipTrend({labels,total,aged,onPick,h}){
+  const ref=useChart(()=>({ type:'bar',
+    data:{ labels, datasets:[
+      { type:'bar', label:'Active WIP', data:total, backgroundColor:'#a55eea', borderRadius:3, order:2 },
+      { type:'line', label:'Aged (≥flag)', data:aged, borderColor:RED, backgroundColor:'rgba(255,71,87,.12)', fill:true, tension:.3, pointRadius:3, order:1 } ]},
+    options:Object.assign(baseOpts(null),{ onClick:(e,els)=>{ if(els.length&&onPick)onPick(els[0].index); },
+      onHover:(e,els)=>{ e.native.target.style.cursor=els.length?'pointer':'default'; } }) }),
+    [JSON.stringify([labels,total,aged])]);
+  if(!HAS_CHART()) return <NoChart h={h}/>;
+  return <div style={{height:h||260}}><canvas ref={ref}></canvas></div>; }
+
+Object.assign(window,{ClickBars,Donut,WipTrend,PALETTE});

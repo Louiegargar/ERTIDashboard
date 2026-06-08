@@ -1,18 +1,36 @@
-// tab-wip.jsx — WIP inventory + aging + complete→output loop (§8.5)
+// tab-wip.jsx — WIP inventory + snapshot + interactive trend/aging/donut (§8.5 + enhancements)
 const { useState: useSw } = React;
 function blankWip(){ const DB=window.STORE.DB; return { hardware_id:'', hw_type:DB.price_settings[0].hw_type, tx_category:DB.VOCAB.txCategory[0], status:'Queued', debug_start:new Date().toISOString().slice(0,10), debug_end:null, engineer_id:null, team:'F2-LTX', notes:'' }; }
 function ageColor(age,cfg){ const b=cfg.agingBuckets; const i=b.findIndex(x=>age>=x[0]&&age<=x[1]);
   return ['var(--accent-green)','var(--accent-gold)','#ff9f43','var(--accent-red)'][i<0?3:i]; }
+const DONUT_DIMS=[{k:'team',l:'Focus Factory'},{k:'status',l:'Status'},{k:'tx_category',l:'Tester'},{k:'hw_type',l:'Hardware Type'}];
+
+function ItemsTable({items}){ const E=window.ENGINE,cfg=window.STORE.DB.config;
+  if(!items.length) return <div className="empty">No items</div>;
+  return <div className="tbl-wrap" style={{maxHeight:340}}><table className="dt">
+    <thead><tr><th>Hardware ID</th><th>Type</th><th>TX</th><th>Status</th><th>Start</th><th className="num">Age</th><th>Team</th></tr></thead>
+    <tbody>{items.map((w,i)=>{const age=E.wipAge(w);return <tr key={i}><td className="mono">{w.hardware_id}</td><td>{w.hw_type}</td>
+      <td><span className="tag">{w.tx_category}</span></td><td>{w.status}</td><td className="mono">{w.debug_start||'—'}</td>
+      <td className="num" style={{color:ageColor(age,cfg),fontWeight:600}}>{age}</td><td className="muted-s">{w.team}</td></tr>;})}</tbody></table></div>; }
 
 function WipTab(){
   useStore(); const E=window.ENGINE,S=window.STORE,DB=S.DB,cfg=DB.config;
   const [edit,setEdit]=useSw(null); const [err,setErr]=useSw(''); const [fStatus,setFStatus]=useSw('active');
-  const all=DB.wip_inventory; const active=E.activeWip();
+  const [dim,setDim]=useSw('team'); const [items,setItems]=useSw(null); // items modal {title, items, extra}
+  const all=DB.wip_inventory; const active=E.activeWip(); const snaps=DB.wip_snapshots||(DB.wip_snapshots=[]);
   const shown=fStatus==='active'?active:fStatus==='all'?all:all.filter(w=>w.status===fStatus);
   const ages=active.map(E.wipAge); const avg=ages.length?Math.round(ages.reduce((a,b)=>a+b,0)/ages.length):0;
   const oldest=ages.length?Math.max(...ages):0; const overFlag=active.filter(w=>E.wipAge(w)>=cfg.agingFlagDays).length;
+
+  // aging buckets
   const buckets=cfg.agingBuckets.map(()=>0); active.forEach(w=>buckets[E.agingBucket(E.wipAge(w))]++);
   const bucketLabels=cfg.agingBuckets.map(x=>x[1]>=9999?x[0]+'+ d':x[0]+'–'+x[1]+' d');
+  const bucketColors=['var(--accent-green)','var(--accent-gold)','#ff9f43','var(--accent-red)'];
+  // donut by dimension
+  const groups={}; active.forEach(w=>{const k=(w[dim]||'—');groups[k]=(groups[k]||0)+1;});
+  const dLabels=Object.keys(groups), dData=dLabels.map(l=>groups[l]);
+  // trend
+  const tr=E.wipTrend(cfg.trendWindowWeekly);
 
   const save=()=>{ const w=edit; if(!w.hardware_id){setErr('Hardware ID required');return;}
     const dup=DB.wip_inventory.find(x=>x.hardware_id===w.hardware_id && x!==w._orig); if(dup){setErr('Hardware ID must be unique');return;}
@@ -22,13 +40,18 @@ function WipTab(){
     if(w._orig)Object.assign(w._orig,rec); else DB.wip_inventory.push(rec);
     S.persist('wip_inventory',rec); setEdit(null);setErr('');S.bump(); };
   const del=(w)=>{ DB.wip_inventory=DB.wip_inventory.filter(x=>x!==w); S.remove('wip_inventory',{hardware_id:w.hardware_id}); S.saveLocal(); S.bump(); };
-  const complete=(w)=>{ w.status='Completed'; if(!w.debug_end)w.debug_end=new Date().toISOString().slice(0,10);
-    S.persist('wip_inventory',w);
-    if(!DB.output_records.find(r=>r.hardware_id===w.hardware_id)){ // no double-count guard
-      const rec={id:w.hardware_id,hardware_id:w.hardware_id,hw_type:w.hw_type,activity_category:cfg.defaultActivityCategory,
-        workweek:window.WW.fromDate(new Date()),output_date:new Date().toISOString().slice(0,10),engineer_id:w.engineer_id||null,team:w.team,qty:1,wip_id:w.id};
-      DB.output_records.push(rec); S.persist('output_records',rec); S.toast('Logged output for '+w.hardware_id); }
-    S.bump(); };
+  const complete=(w)=>{ w.status='Completed'; if(!w.debug_end)w.debug_end=new Date().toISOString().slice(0,10); S.persist('wip_inventory',w);
+    if(!DB.output_records.find(r=>r.hardware_id===w.hardware_id)){ const rec={id:w.hardware_id,hardware_id:w.hardware_id,hw_type:w.hw_type,activity_category:cfg.defaultActivityCategory,workweek:window.WW.fromDate(new Date()),output_date:new Date().toISOString().slice(0,10),engineer_id:w.engineer_id||null,team:w.team,qty:1,wip_id:w.id};
+      DB.output_records.push(rec); S.persist('output_records',rec); S.toast('Logged output for '+w.hardware_id); } S.bump(); };
+  const snap=()=>{ const row=E.snapshotNow(); const ex=snaps.findIndex(s=>s.period_key===row.period_key);
+    if(ex>=0)snaps[ex]=row; else snaps.push(row); S.persist('wip_snapshots',row);
+    S.toast('Snapped '+row.period_key+' · '+row.total_active+' active WIP'); S.bump(); };
+
+  const pickBucket=(i)=>{ const its=active.filter(w=>E.agingBucket(E.wipAge(w))===i); setItems({title:'Aging bucket · '+bucketLabels[i],items:its}); };
+  const pickSlice=(label)=>{ const its=active.filter(w=>(w[dim]||'—')===label); const dimL=DONUT_DIMS.find(d=>d.k===dim).l;
+    setItems({title:dimL+' · '+label,items:its}); };
+  const pickWeek=(i)=>{ const ww=tr.periods[i]; const its=E.wipActiveDuringWW(ww); const sn=snaps.find(s=>s.period_key===ww);
+    setItems({title:'WIP active during '+ww+(sn?' (snapped)':' (computed)'),items:its,snap:sn}); };
 
   return (
     <div className="view-inner">
@@ -38,38 +61,53 @@ function WipTab(){
           <button className={'fchip'+(fStatus==='all'?' active':'')} onClick={()=>setFStatus('all')}>All · {all.length}</button>
           {DB.VOCAB.wipStatus.map(s=><button key={s} className={'fchip'+(fStatus===s?' active':'')} onClick={()=>setFStatus(s)}>{s}</button>)}
         </div>
-        <button className="btn pri" onClick={()=>{setErr('');setEdit(blankWip());}}><Icon d={I.plus} size={13}/> Add WIP</button>
+        <div className="row" style={{gap:8}}>
+          <button className="btn" onClick={snap}><Icon d={I.clock} size={13}/> Snap WIP · {E.currentWW()}</button>
+          <button className="btn pri" onClick={()=>{setErr('');setEdit(blankWip());}}><Icon d={I.plus} size={13}/> Add WIP</button>
+        </div>
       </div>
 
       <div className="grid g-4">
-        <Tile label="Active WIP" value={active.length} accent="var(--accent-blue)"/>
+        <Tile label="Active WIP" value={active.length} accent="var(--accent-purple)"/>
         <Tile label="Avg Age (days)" value={avg}/>
         <Tile label="Oldest (days)" value={oldest} accent={oldest>=cfg.agingFlagDays?'var(--accent-red)':null}/>
         <Tile label={'Over '+cfg.agingFlagDays+'d'} value={overFlag} accent={overFlag?'var(--accent-gold)':null}/>
       </div>
 
-      <div className="grid g-2-1">
-        <Panel title="WIP Inventory" icon={I.box} sub={shown.length+' shown'} pad={false}>
-          <div className="tbl-wrap"><table className="dt">
-            <thead><tr><th>Hardware ID</th><th>Type</th><th>TX</th><th>Status</th><th>Start</th><th>End</th><th className="num">Age</th><th>Eng/Team</th><th></th></tr></thead>
-            <tbody>{shown.map((w,i)=>{const age=E.wipAge(w);return(<tr key={i}>
-              <td className="mono">{w.hardware_id}</td><td>{w.hw_type}</td><td><span className="tag">{w.tx_category}</span></td>
-              <td><span className={'tag '+(w.status==='Completed'?'green':w.status==='Scrapped'?'red':w.status==='In Debug'?'teal':'gold')}>{w.status}</span></td>
-              <td className="mono">{w.debug_start||'—'}</td><td className="mono">{w.debug_end||'—'}</td>
-              <td className="num" style={{color:ageColor(age,cfg),fontWeight:600}}>{age}</td>
-              <td className="muted-s">{w.team}</td>
-              <td><div className="row" style={{gap:4}}>
-                <button className="btn sm" onClick={()=>{setErr('');setEdit(Object.assign({},w,{_orig:w}));}}>Edit</button>
-                {w.status!=='Completed'&&w.status!=='Scrapped'&&<button className="btn sm pri" onClick={()=>complete(w)}>Complete</button>}
-                <button className="btn sm danger" onClick={()=>del(w)}>✕</button></div></td></tr>);})}
-            </tbody></table>
-            {shown.length===0&&<div className="empty">No WIP items</div>}
+      <Panel title="WIP Trend per Workweek" icon={I.pulse} sub={'snapped where available · '+tr.hasSnap.filter(Boolean).length+'/'+tr.periods.length+' weeks snapped'}
+        right={<span className="muted-s">click a week to inspect</span>}>
+        <WipTrend labels={tr.labels} total={tr.totals} aged={tr.aged} onPick={pickWeek} h={260}/>
+      </Panel>
+
+      <div className="grid g-2">
+        <Panel title="Aging Distribution" icon={I.clock} sub="active WIP · click a bar" >
+          <ClickBars labels={bucketLabels} data={buckets} colors={bucketColors} onPick={pickBucket} h={300}/>
+        </Panel>
+        <Panel title="WIP Breakdown" icon={I.layers}
+          right={<Seg value={dim} options={DONUT_DIMS} onChange={setDim}/>}>
+          <div className="row" style={{gap:16,alignItems:'center'}}>
+            <div style={{flex:'1 1 55%',minWidth:0}}><Donut labels={dLabels} data={dData} onPick={pickSlice} h={260}/></div>
+            <div className="dim-legend" style={{flex:'1 1 40%'}}>{dLabels.map((l,i)=>(
+              <div key={l} className="li" onClick={()=>pickSlice(l)}><span className="sw" style={{background:window.PALETTE[i%window.PALETTE.length]}}></span>{l}<span className="v">{dData[i]}</span></div>))}
+              {dLabels.length===0&&<span className="muted-s">No active WIP</span>}</div>
           </div>
         </Panel>
-        <Panel title="Aging Distribution" icon={I.clock} sub="active WIP">
-          <AgingBars labels={bucketLabels} data={buckets} h={220}/>
-        </Panel>
       </div>
+
+      <Panel title="WIP Inventory" icon={I.box} sub={shown.length+' shown'} pad={false}>
+        <div className="tbl-wrap"><table className="dt">
+          <thead><tr><th>Hardware ID</th><th>Type</th><th>TX</th><th>Status</th><th>Start</th><th>End</th><th className="num">Age</th><th>Eng/Team</th><th></th></tr></thead>
+          <tbody>{shown.map((w,i)=>{const age=E.wipAge(w);return(<tr key={i}>
+            <td className="mono">{w.hardware_id}</td><td>{w.hw_type}</td><td><span className="tag">{w.tx_category}</span></td>
+            <td><span className={'tag '+(w.status==='Completed'?'green':w.status==='Scrapped'?'red':w.status==='In Debug'?'teal':'gold')}>{w.status}</span></td>
+            <td className="mono">{w.debug_start||'—'}</td><td className="mono">{w.debug_end||'—'}</td>
+            <td className="num" style={{color:ageColor(age,cfg),fontWeight:600}}>{age}</td><td className="muted-s">{w.team}</td>
+            <td><div className="row" style={{gap:4}}>
+              <button className="btn sm" onClick={()=>{setErr('');setEdit(Object.assign({},w,{_orig:w}));}}>Edit</button>
+              {w.status!=='Completed'&&w.status!=='Scrapped'&&<button className="btn sm pri" onClick={()=>complete(w)}>Complete</button>}
+              <button className="btn sm danger" onClick={()=>del(w)}>✕</button></div></td></tr>);})}
+          </tbody></table>{shown.length===0&&<div className="empty">No WIP items</div>}</div>
+      </Panel>
 
       {edit&&<Modal open={true} title={edit._orig?'Edit WIP':'Add WIP'} onClose={()=>setEdit(null)}
         footer={<><button className="btn" onClick={()=>setEdit(null)}>Cancel</button><button className="btn pri" onClick={save}>Save</button></>}>
@@ -82,6 +120,12 @@ function WipTab(){
         <div className="frow"><label>Debug End</label><input type="date" value={edit.debug_end||''} onChange={e=>setEdit({...edit,debug_end:e.target.value})}/></div>
         <div className="frow"><label>Engineer</label><select value={edit.engineer_id||''} onChange={e=>setEdit({...edit,engineer_id:e.target.value})}><option value="">—</option>{DB.engineers.map(en=><option key={en.id} value={en.id}>{en.name}</option>)}</select></div>
         <div className="frow"><label>Notes</label><input type="text" value={edit.notes||''} onChange={e=>setEdit({...edit,notes:e.target.value})}/></div>
+      </Modal>}
+
+      {items&&<Modal open={true} title={items.title} onClose={()=>setItems(null)} footer={<button className="btn" onClick={()=>setItems(null)}>Close</button>}>
+        {items.snap&&<div className="row wrap" style={{gap:6,marginBottom:10}}>
+          {Object.entries(items.snap.by_status||{}).map(([k,v])=><span key={k} className="tag teal">{k}: {v}</span>)}</div>}
+        <ItemsTable items={items.items}/>
       </Modal>}
     </div>
   );

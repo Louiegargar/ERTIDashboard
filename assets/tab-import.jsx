@@ -1,46 +1,88 @@
-// tab-import.jsx — Excel/CSV import with entity mapping (§8.9)
+// tab-import.jsx — Excel/CSV import with column mapping + feedback (§8.9)
 const { useState: useSi, useRef: useRi } = React;
+const ENT_FIELDS={
+  output_records:{label:'Output Records',req:['hardware_id'],fields:['hardware_id','hw_type','activity_category','workweek','output_date','engineer_id','team','qty']},
+  wip_inventory:{label:'WIP Inventory',req:['hardware_id'],fields:['hardware_id','hw_type','tx_category','status','debug_start','debug_end','engineer_id','team','notes']},
+  output_targets:{label:'Output Targets',req:['period_key','hw_type'],fields:['period_type','period_key','plan_type','hw_type','team','target_count']},
+  engineers:{label:'Roster',req:['id'],fields:['id','last','first','pos','team','hired','status']}
+};
+const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+function autoMap(fields,cols){ const m={}; fields.forEach(f=>{ const nf=norm(f);
+  let hit=cols.find(c=>norm(c)===nf)||cols.find(c=>norm(c).includes(nf)||nf.includes(norm(c))); m[f]=hit||''; }); return m; }
+
 function ImportTab(){
   useStore(); const S=window.STORE,DB=S.DB; const [entity,setEntity]=useSi('output_records');
-  const [log,setLog]=useSi([]); const [preview,setPreview]=useSi(null); const fileRef=useRi(null);
-  const ENT={ output_records:'Output Records', wip_inventory:'WIP Inventory', output_targets:'Output Targets', engineers:'Roster' };
+  const [log,setLog]=useSi([]); const [preview,setPreview]=useSi(null); const [map,setMap]=useSi({}); const fileRef=useRi(null);
+  const spec=ENT_FIELDS[entity];
   const addLog=(m,ok)=>setLog(l=>[{m,ok,t:new Date().toLocaleTimeString()},...l].slice(0,40));
-  const onFile=(f)=>{ if(!f)return; if(typeof XLSX==='undefined'){addLog('SheetJS not loaded',false);return;}
+
+  const onFile=(f)=>{ if(!f)return; if(typeof XLSX==='undefined'){addLog('SheetJS not loaded — cannot parse',false);S.toast('SheetJS not loaded');return;}
     const rd=new FileReader(); rd.onload=ev=>{ try{ const wb=XLSX.read(ev.target.result,{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]]; const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-      setPreview({cols:Object.keys(rows[0]||{}),rows}); addLog('Read '+rows.length+' rows from '+f.name+' · sheet "'+wb.SheetNames[0]+'"',true);
+      const cols=Object.keys(rows[0]||{}); setPreview({cols,rows,sheet:wb.SheetNames[0],file:f.name}); setMap(autoMap(spec.fields,cols));
+      addLog('Read '+rows.length+' rows from "'+wb.SheetNames[0]+'" ('+f.name+')',true);
     }catch(e){addLog('Parse error: '+e.message,false);} }; rd.readAsArrayBuffer(f); };
-  const commit=()=>{ if(!preview)return; let n=0;
+
+  const reMap=(ent)=>{ setEntity(ent); if(preview)setMap(autoMap(ENT_FIELDS[ent].fields,preview.cols)); };
+
+  const commit=()=>{ if(!preview){S.toast('Nothing to import');return;}
+    const missingReq=spec.req.filter(r=>!map[r]);
+    if(missingReq.length){ addLog('Map required column(s): '+missingReq.join(', '),false); S.toast('Map required: '+missingReq.join(', ')); return; }
+    const g=(row,f)=>{ const c=map[f]; return c?row[c]:''; };
+    let added=0,skipDup=0,skipBad=0;
     preview.rows.forEach(r=>{ try{
-      if(entity==='output_records'){ const rec={id:r.hardware_id,hardware_id:String(r.hardware_id||''),hw_type:r.hw_type,activity_category:r.activity_category||DB.config.defaultActivityCategory,workweek:r.workweek||'',output_date:r.output_date||'',engineer_id:r.engineer_id?+r.engineer_id:null,team:r.team||'',qty:+r.qty||1};
-        if(rec.hardware_id&&!DB.output_records.find(x=>x.hardware_id===rec.hardware_id)){DB.output_records.push(rec);S.persist('output_records',rec);n++;} }
-      else if(entity==='wip_inventory'){ const rec={id:r.hardware_id,hardware_id:String(r.hardware_id||''),hw_type:r.hw_type,tx_category:r.tx_category||'',status:r.status||'Queued',debug_start:r.debug_start||'',debug_end:r.debug_end||null,engineer_id:r.engineer_id?+r.engineer_id:null,team:r.team||'',notes:r.notes||''};
-        if(rec.hardware_id&&!DB.wip_inventory.find(x=>x.hardware_id===rec.hardware_id)){DB.wip_inventory.push(rec);S.persist('wip_inventory',rec);n++;} }
-      else if(entity==='output_targets'){ const rec={id:r.plan_type+'-'+r.period_key+'-'+r.hw_type,period_type:r.period_type||'monthly',period_key:String(r.period_key||''),plan_type:r.plan_type||'budget',hw_type:r.hw_type,team:r.team||'ALL',target_count:+r.target_count||0};
-        DB.output_targets.push(rec);S.persist('output_targets',rec);n++; }
-      else if(entity==='engineers'){ const rec={id:+r.id||+r.no,no:String(r.no||r.id),last:r.last||'',first:r.first||'',name:(r.last||'')+', '+(r.first||''),pos:r.pos||'Engineer1',team:r.team||'',hired:r.hired||'',resigned:r.resigned||null,status:r.status||'Regular'};
-        if(rec.id&&!DB.engineers.find(x=>x.id===rec.id)){DB.engineers.push(rec);S.persist('engineers',rec);n++;} }
-    }catch(e){} });
-    addLog('Committed '+n+' new '+ENT[entity]+' rows',true); setPreview(null); S.saveLocal(); S.bump(); };
+      if(entity==='output_records'){ const hid=String(g(r,'hardware_id')||'').trim(); if(!hid){skipBad++;return;}
+        if(DB.output_records.find(x=>x.hardware_id===hid)){skipDup++;return;}
+        const rec={id:hid,hardware_id:hid,hw_type:g(r,'hw_type')||'Other',activity_category:g(r,'activity_category')||DB.config.defaultActivityCategory,
+          workweek:g(r,'workweek')||'',output_date:g(r,'output_date')||'',engineer_id:g(r,'engineer_id')?+g(r,'engineer_id'):null,team:g(r,'team')||'',qty:+g(r,'qty')||1};
+        if(!rec.output_date&&rec.workweek){try{rec.output_date=window.WW.toDate(rec.workweek).toISOString().slice(0,10);}catch(e){}}
+        DB.output_records.push(rec);S.persist('output_records',rec);added++; }
+      else if(entity==='wip_inventory'){ const hid=String(g(r,'hardware_id')||'').trim(); if(!hid){skipBad++;return;}
+        if(DB.wip_inventory.find(x=>x.hardware_id===hid)){skipDup++;return;}
+        const rec={id:hid,hardware_id:hid,hw_type:g(r,'hw_type')||'Other',tx_category:g(r,'tx_category')||'',status:g(r,'status')||'Queued',
+          debug_start:g(r,'debug_start')||'',debug_end:g(r,'debug_end')||null,engineer_id:g(r,'engineer_id')?+g(r,'engineer_id'):null,team:g(r,'team')||'',notes:g(r,'notes')||''};
+        DB.wip_inventory.push(rec);S.persist('wip_inventory',rec);added++; }
+      else if(entity==='output_targets'){ const pk=String(g(r,'period_key')||'').trim(),hw=g(r,'hw_type'); if(!pk||!hw){skipBad++;return;}
+        const ptype=g(r,'period_type')||'monthly',plan=g(r,'plan_type')||'budget',team=g(r,'team')||'ALL';
+        const id=plan+'-'+pk+'-'+hw+'-'+team; const ex=DB.output_targets.find(t=>t.period_type===ptype&&t.period_key===pk&&t.plan_type===plan&&t.hw_type===hw&&t.team===team);
+        const rec={id,period_type:ptype,period_key:pk,plan_type:plan,hw_type:hw,team,target_count:+g(r,'target_count')||0};
+        if(ex)Object.assign(ex,rec); else DB.output_targets.push(rec); S.persist('output_targets',rec);added++; }
+      else if(entity==='engineers'){ const id=+g(r,'id'); if(!id){skipBad++;return;}
+        if(DB.engineers.find(x=>x.id===id)){skipDup++;return;}
+        const rec={id,no:String(id),last:g(r,'last')||'',first:g(r,'first')||'',name:(g(r,'last')||'')+', '+(g(r,'first')||''),pos:g(r,'pos')||'Engineer1',team:g(r,'team')||'',hired:g(r,'hired')||'',resigned:null,status:g(r,'status')||'Regular'};
+        DB.engineers.push(rec);S.persist('engineers',rec);added++; }
+    }catch(e){skipBad++;} });
+    const msg='Committed '+added+' '+spec.label+(skipDup?(' · '+skipDup+' dup skipped'):'')+(skipBad?(' · '+skipBad+' invalid'):'');
+    addLog(msg, added>0); S.toast(msg); setPreview(null); S.saveLocal(); S.bump(); };
+
   return (
     <div className="view-inner">
       <Panel title="Import Data" icon={I.upload} sub="Excel / CSV via SheetJS">
         <div className="row wrap" style={{gap:10,marginBottom:12}}>
           <label className="muted-s">Map sheet to:</label>
-          <select value={entity} onChange={e=>setEntity(e.target.value)}>{Object.entries(ENT).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select>
+          <select value={entity} onChange={e=>reMap(e.target.value)}>{Object.entries(ENT_FIELDS).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select>
           <button className="btn" onClick={()=>fileRef.current.click()}>Choose file…</button>
-          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" style={{display:'none'}} onChange={e=>onFile(e.target.files[0])}/>
+          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" style={{display:'none'}} onChange={e=>{onFile(e.target.files[0]);e.target.value='';}}/>
           {preview&&<button className="btn pri" onClick={commit}>Commit {preview.rows.length} rows</button>}
         </div>
-        <div className="callout">Columns are matched by header name to <b>{ENT[entity]}</b> fields. Duplicate <b>hardware_id</b> rows are skipped. Review the preview before committing.</div>
-        {preview&&<div className="tbl-wrap" style={{marginTop:12,maxHeight:280}}><table className="dt">
-          <thead><tr>{preview.cols.map(c=><th key={c}>{c}</th>)}</tr></thead>
-          <tbody>{preview.rows.slice(0,30).map((r,i)=><tr key={i}>{preview.cols.map(c=><td key={c}>{String(r[c])}</td>)}</tr>)}</tbody></table></div>}
+        {!preview&&<div className="callout">Pick the target entity, choose a file, then confirm the <b>column mapping</b> before committing. Headers are matched automatically (case/spacing-insensitive); adjust any that didn't match. Duplicate IDs are skipped.</div>}
+        {preview&&<>
+          <div className="panel inset" style={{padding:12,marginBottom:12}}>
+            <div className="muted-s" style={{marginBottom:8}}>Column mapping — <b>{preview.file}</b> · sheet "{preview.sheet}" · {preview.rows.length} rows</div>
+            <div className="grid g-3">{spec.fields.map(f=>(<div key={f} className="frow" style={{gridTemplateColumns:'1fr',gap:4,padding:0}}>
+              <label>{f}{spec.req.includes(f)&&<span style={{color:'var(--accent-red)'}}> *</span>}</label>
+              <select value={map[f]||''} onChange={e=>setMap({...map,[f]:e.target.value})}>
+                <option value="">— none —</option>{preview.cols.map(c=><option key={c} value={c}>{c}</option>)}</select></div>))}</div>
+          </div>
+          <div className="tbl-wrap" style={{maxHeight:260}}><table className="dt">
+            <thead><tr>{preview.cols.map(c=><th key={c}>{c}</th>)}</tr></thead>
+            <tbody>{preview.rows.slice(0,20).map((r,i)=><tr key={i}>{preview.cols.map(c=><td key={c}>{String(r[c])}</td>)}</tr>)}</tbody></table></div>
+        </>}
       </Panel>
       <Panel title="Import Log" icon={I.layers} pad={false}>
         {log.length===0?<div className="empty">No imports yet</div>:
           <table className="dt"><tbody>{log.map((l,i)=><tr key={i}><td className="mono muted-s" style={{width:90}}>{l.t}</td>
-            <td><span className={'tag '+(l.ok?'green':'red')}>{l.ok?'ok':'err'}</span></td><td>{l.m}</td></tr>)}</tbody></table>}
+            <td><span className={'tag '+(l.ok?'green':'red')}>{l.ok?'ok':'note'}</span></td><td>{l.m}</td></tr>)}</tbody></table>}
       </Panel>
     </div>
   );

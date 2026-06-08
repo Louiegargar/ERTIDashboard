@@ -84,3 +84,27 @@
     agingBucket, manning, avgRating, competencyIndex, buildSeries };
   if (typeof module !== 'undefined') module.exports = window.ENGINE;
 })();
+
+// ── WIP-over-time + snapshot helpers (appended) ──
+(function () { const E = window.ENGINE;
+  function overlapWW(item, ww) { const ws = window.WW.toDate(ww).getTime(); const we = ws + 7 * 86400000;
+    const s = new Date(item.debug_start).getTime(); const e = item.debug_end ? new Date(item.debug_end).getTime() : Date.now();
+    return !isNaN(s) && s <= we && e >= ws; }
+  E.currentWW = function () { return window.WW.fromDate(new Date()); };
+  E.wipActiveDuringWW = function (ww) { return window.STORE.DB.wip_inventory.filter(w => overlapWW(w, ww)); };
+  E.wipTrend = function (n, endWW) { const all = window.ALL_WW; const end = endWW || E.currentWW();
+    let i = all.indexOf(end); if (i < 0) i = all.length - 1; const periods = all.slice(Math.max(0, i - n + 1), i + 1);
+    const snaps = window.STORE.DB.wip_snapshots || []; const cfg = window.STORE.DB.config;
+    const totals = [], aged = [], hasSnap = [];
+    periods.forEach(ww => { const snap = snaps.find(s => s.period_key === ww);
+      if (snap) { totals.push(snap.total_active); aged.push(snap.aged || 0); hasSnap.push(true); }
+      else { const items = E.wipActiveDuringWW(ww); totals.push(items.length); hasSnap.push(false);
+        const we = window.WW.toDate(ww).getTime() + 7 * 86400000;
+        aged.push(items.filter(w => (we - new Date(w.debug_start).getTime()) / 86400000 >= cfg.agingFlagDays).length); } });
+    return { periods, labels: periods, totals, aged, hasSnap }; };
+  E.snapshotNow = function () { const active = E.activeWip(); const cfg = window.STORE.DB.config;
+    const by = f => { const o = {}; active.forEach(w => { const k = f(w) || '—'; o[k] = (o[k] || 0) + 1; }); return o; };
+    return { id: E.currentWW(), period_key: E.currentWW(), snapped_at: new Date().toISOString(),
+      total_active: active.length, aged: active.filter(w => E.wipAge(w) >= cfg.agingFlagDays).length,
+      by_status: by(w => w.status), by_tester: by(w => w.tx_category), by_hwtype: by(w => w.hw_type), by_team: by(w => w.team) }; };
+})();
