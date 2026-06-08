@@ -106,3 +106,17 @@ index* from real output volume.
 - **WIP donut** — switch the grouping between Focus Factory (team), Status, Tester
   (TX category), and Hardware Type; click a slice (or legend row) to list its items.
 - New table `wip_snapshots` added to `MIGRATION.sql` and the sync set.
+
+## Session 3 — offline / self-hosted + fixes
+- **No more "Tracking Prevention blocked access to storage"** — all libraries
+  (React, ReactDOM, Chart.js, SheetJS, Supabase, Babel) are self-hosted under
+  `assets/vendor/` and loaded same-origin; the Google Fonts link was removed
+  (CSS falls back to Segoe UI / system fonts). Nothing is fetched cross-site.
+- The single-file **preview is precompiled** (JSX → JS at package time) so it ships
+  with no in-browser Babel and shows no "precompile for production" warning. The
+  multi-file app keeps Babel-standalone locally to preserve the no-build edit flow
+  (that advisory warning is harmless; ignore it).
+- **Larger loading banner**, text no longer overlaps.
+- **Executive Pulse charts clamp to the current work week** — period options and all
+  trend series (Output/Revenue Actual·Projected·Budget, Budget-vs-Actual,
+  Projected-vs-Actual) stop at the current period, so no empty future weeks render.

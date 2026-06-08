@@ -25,7 +25,7 @@ function Executive(){
   const n=pt==='weekly'?cfg.trendWindowWeekly:cfg.trendWindowMonthly;
   const ser=E.buildSeries(pt,n,pk,team);
   const teams=[...new Set(DB.engineers.filter(e=>!e.resigned).map(e=>e.team))];
-  const opts=periodsWithData(pt); if(opts.length && !opts.includes(pk)) setPeriod({periodKey:opts[opts.length-1]});
+  const opts=periodsWithData(pt).filter(k=>E.clampPeriod(pt,k)===k); if(opts.length && !opts.includes(pk)) setPeriod({periodKey:opts[opts.length-1]});
 
   const card=(key,label,value,sub,cls,icon)=>(<KpiCard key={key} label={label} value={value} sub={sub} cls={cls} icon={icon} onClick={()=>{Object.assign(st,{modalKey:key,modalPeriodType:pt,modalRange:n});S.bump();}}/>);
 

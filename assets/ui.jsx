@@ -55,8 +55,8 @@ Object.assign(window,{peso,fmtInt,clsFor,Icon,I,useStore,commit,SyncDot,Panel,Kp
 // loading banner (in-app waits) — instant boot splash lives in index.html
 function Banner(){ useStore(); const b=window.STORE.getBanner();
   return (<div className={'banner'+(b.show?'':' hide')}>
-    <div className="splash-mark"><Icon d={I.pulse} size={30}/></div>
-    <div style={{textAlign:'center'}}><div className="splash-title">{b.text||'ERTI Nerve Center'}</div>
-      <div className="splash-sub">F2 · ETS / LTX Debug Ops</div></div>
+    <div className="splash-mark"><Icon d={I.pulse} size={44}/></div>
+    <div className="splash-text"><div className="splash-title">{b.text||'ERTI Nerve Center'}</div>
+      <div className="splash-sub">F2 · ETS / LTX Debug Operations</div></div>
     <div className="splash-bar"><i></i></div></div>); }
 window.Banner=Banner;

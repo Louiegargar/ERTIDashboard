@@ -74,7 +74,10 @@
     if (!act.length) return 0; const a = act.map(e => avgRating(e.id)); return a.reduce((x, y) => x + y, 0) / act.length; }
 
   // ── Trend series (anchor + modal) ──
-  function buildSeries(pt, n, endKey, team) { const P = periodList(pt, n, endKey || window.STORE.state.periodKey);
+  function buildSeries(pt, n, endKey, team) {
+    var ek = endKey || window.STORE.state.periodKey;
+    if (window.ENGINE && window.ENGINE.clampPeriod) ek = window.ENGINE.clampPeriod(pt, ek);
+    var P = periodList(pt, n, ek);
     return { periods: P, labels: P.map(k => periodLabel(pt, k)),
       outActual: P.map(k => actualOutput(pt, k, team)), outProj: P.map(k => planOutput(pt, k, 'projected', team)), outBudget: P.map(k => planOutput(pt, k, 'budget', team)),
       revActual: P.map(k => actualRevenue(pt, k, team)), revProj: P.map(k => planRevenue(pt, k, 'projected', team)), revBudget: P.map(k => planRevenue(pt, k, 'budget', team)) }; }
@@ -91,6 +94,11 @@
     const s = new Date(item.debug_start).getTime(); const e = item.debug_end ? new Date(item.debug_end).getTime() : Date.now();
     return !isNaN(s) && s <= we && e >= ws; }
   E.currentWW = function () { return window.WW.fromDate(new Date()); };
+  E.currentPeriod = function (pt) { var d = new Date();
+    return pt === 'weekly' ? window.WW.fromDate(d) : (d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0')); };
+  E.clampPeriod = function (pt, key) { if (!key) return key; var cur = E.currentPeriod(pt);
+    if (pt === 'weekly') { var a = window.ALL_WW.indexOf(key), b = window.ALL_WW.indexOf(cur); if (a < 0 || b < 0) return key; return a > b ? cur : key; }
+    return key > cur ? cur : key; };
   E.wipActiveDuringWW = function (ww) { return window.STORE.DB.wip_inventory.filter(w => overlapWW(w, ww)); };
   E.wipTrend = function (n, endWW) { const all = window.ALL_WW; const end = endWW || E.currentWW();
     let i = all.indexOf(end); if (i < 0) i = all.length - 1; const periods = all.slice(Math.max(0, i - n + 1), i + 1);
