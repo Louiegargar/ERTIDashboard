@@ -45,7 +45,7 @@
   const CONFLICT = { output_records: 'hardware_id', wip_inventory: 'hardware_id',
     output_targets: 'period_type,period_key,plan_type,hw_type,team', price_settings: 'hw_type',
     platform_ratings: 'engineer_id,platform', schedule_entries: 'engineer_id,schedule_date',
-    engineers: 'id', team_budgets: 'team', manning_targets: 'team', wip_snapshots: 'period_key' };
+    engineers: 'id', team_budgets: 'team,period_key', manning_targets: 'team', wip_snapshots: 'period_key' };
   function persist(table, row) { saveLocal(); if (!sb || !DB.config.autoPush) return;
     const key = table + ':' + (row.id || row.hardware_id || row.period_key || JSON.stringify(row).slice(0, 40));
     clearTimeout(_timers[key]); setSync('saving');

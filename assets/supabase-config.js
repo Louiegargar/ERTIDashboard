@@ -6,6 +6,6 @@
 //   2. Paste the Project URL and the *anon public* key below (anon key is safe for
 //      client use when Row Level Security is configured; do not paste the service key).
 window.ERTI_SUPABASE = {
-  url: "https://ejheffpgqnutnsxlzqfe.supabase.co",   // e.g. "https://yourproject.supabase.co"
-  key: "sb_publishable_1YmzaDJMqXSzlYICFgvruQ_DtqfS6k8"    // e.g. "eyJhbGciOi..."  (anon public key)
+  url: "",   // e.g. "https://ejheffpgqnutnsxlzqfe.supabase.co"
+  key: ""    // e.g. "sb_publishable_1YmzaDJMqXSzlYICFgvruQ_DtqfS6k8"  (anon public key)
 };

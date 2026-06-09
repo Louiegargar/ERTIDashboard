@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS price_settings (
   hw_type text PRIMARY KEY, price numeric DEFAULT 0, placeholder boolean DEFAULT false);
 
 CREATE TABLE IF NOT EXISTS team_budgets (
-  team text PRIMARY KEY, budget numeric DEFAULT 0, forecast numeric DEFAULT 0);
+  team text, period_key text, budget numeric DEFAULT 0, forecast numeric DEFAULT 0,
+  PRIMARY KEY (team, period_key));
 
 CREATE TABLE IF NOT EXISTS manning_targets (
   team text PRIMARY KEY, target int DEFAULT 0);

@@ -101,7 +101,9 @@
   }); });
 
   // ── Team budgets (PLACEHOLDER ₱) ──
-  DB.team_budgets = [{ team: 'F2-LTX', budget: 400000, forecast: 380000 }, { team: 'F2-ETS', budget: 300000, forecast: 320000 }];
+  DB.team_budgets = []; ['2025-08','2025-09','2026-01'].forEach(function(mk){
+    DB.team_budgets.push({ team:'F2-LTX', period_key:mk, budget:400000, forecast:380000, placeholder:true });
+    DB.team_budgets.push({ team:'F2-ETS', period_key:mk, budget:300000, forecast:320000, placeholder:true }); });
   // ── Manning targets (PLACEHOLDER) ──
   DB.manning_targets = [{ team: 'F2-LTX', target: 8 }, { team: 'F2-ETS', target: 6 }];
 

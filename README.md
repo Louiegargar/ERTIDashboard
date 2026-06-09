@@ -120,3 +120,30 @@ index* from real output volume.
 - **Executive Pulse charts clamp to the current work week** — period options and all
   trend series (Output/Revenue Actual·Projected·Budget, Budget-vs-Actual,
   Projected-vs-Actual) stop at the current period, so no empty future weeks render.
+
+## Session 4 — Babel removed from runtime + Revenue/Import features
+**The Tracking-Prevention / Babel errors are gone for good**
+- The app now loads a **precompiled bundle** (`assets/app.bundle.js`) — there is no
+  in-browser Babel and no `text/babel` scripts, so the "in-browser Babel transformer"
+  warning is gone. Combined with the self-hosted libs, the page makes **zero
+  third-party requests**.
+- The canonical entry is now **`index.html`** (most static hosts serve this by
+  default). `ERTI Nerve Center.html` is an identical copy. **Replace your deployed
+  file with this `index.html` and hard-refresh** — the errors you still saw were a
+  stale entry pointing at `unpkg`.
+- The `.jsx` files remain the editable source. After editing, regenerate the bundle:
+  **`node build.js`** (uses the vendored Babel; no global install needed).
+
+**Revenue & Targets**
+- **Price Book** is fully editable: rename a hardware type (cascades to existing
+  output/WIP/target records), edit its price, and add or remove types.
+- **Team Budgets** are now **per month** — pick the planning month at the top; budget
+  and forecast are stored per team per month (`team_budgets` PK is now
+  `(team, period_key)` — re-run `MIGRATION.sql`).
+- **Output Targets** are entered for the **same selected month** (Budget / Projected
+  toggle, live ₱, run-rate fill).
+
+**Import Data**
+- New **Overwrite existing** toggle: off = duplicate IDs are skipped (default);
+  on = duplicates update the existing record. The result line reports
+  added / updated / skipped / invalid counts.

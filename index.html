@@ -4,43 +4,28 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>ERTI Debug Nerve Center — Operations</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="assets/app.css"/>
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<!-- self-hosted libraries, same-origin (no CDN -> no Tracking Prevention; no Babel at runtime) -->
+<script src="assets/vendor/react.production.min.js"></script>
+<script src="assets/vendor/react-dom.production.min.js"></script>
+<script src="assets/vendor/chart.umd.js"></script>
+<script src="assets/vendor/xlsx.full.min.js"></script>
+<script src="assets/vendor/supabase.js"></script>
 </head>
 <body>
 <div id="root"></div>
-<!-- instant boot splash (removed by app.jsx once mounted / synced) -->
 <div id="boot-splash" class="splash">
-  <div class="splash-mark"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></div>
-  <div style="text-align:center"><div class="splash-title">ERTI Nerve Center</div><div class="splash-sub">F2 · ETS / LTX Debug Ops</div></div>
+  <div class="splash-mark"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></div>
+  <div class="splash-text"><div class="splash-title">ERTI Nerve Center</div><div class="splash-sub">F2 · ETS / LTX Debug Operations</div></div>
   <div class="splash-bar"><i></i></div>
 </div>
-<!-- baked credentials + data/engine layer (plain scripts) -->
+<!-- credentials + data/engine layer -->
 <script src="assets/supabase-config.js"></script>
 <script src="assets/ww.js"></script>
 <script src="assets/store.js"></script>
 <script src="assets/engine.js"></script>
 <script src="assets/seed.js"></script>
-<!-- views (Babel) -->
-<script type="text/babel" src="assets/ui.jsx"></script>
-<script type="text/babel" src="assets/charts.jsx"></script>
-<script type="text/babel" src="assets/kpi-modal.jsx"></script>
-<script type="text/babel" src="assets/tab-executive.jsx"></script>
-<script type="text/babel" src="assets/tab-revenue.jsx"></script>
-<script type="text/babel" src="assets/tab-output.jsx"></script>
-<script type="text/babel" src="assets/tab-wip.jsx"></script>
-<script type="text/babel" src="assets/tab-manpower.jsx"></script>
-<script type="text/babel" src="assets/tab-skills.jsx"></script>
-<script type="text/babel" src="assets/tab-people.jsx"></script>
-<script type="text/babel" src="assets/tab-import.jsx"></script>
-<script type="text/babel" src="assets/tab-settings.jsx"></script>
-<script type="text/babel" src="assets/app.jsx"></script>
+<!-- precompiled views (regenerate with: node build.js) -->
+<script src="assets/app.bundle.js"></script>
 </body>
 </html>
